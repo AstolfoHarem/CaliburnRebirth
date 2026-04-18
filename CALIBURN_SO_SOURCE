@@ -1,0 +1,731 @@
+-- Codes
+local Codes = {
+	"300LIKES!",
+	"BOKUNORHYTHM!",
+	"GOBEYOND!",
+	"ILOVECHADMISSIONERS!",
+	"BOKUNORHYTHM!!"
+}
+
+-- Settings
+_G.AutoFarmSettings = {
+	Autofarm = false,
+	AutoPrestige = false,
+	UseStand = true,
+	Height = 10,
+	Blind = false,
+	Attacks = {
+		Heavy = true,
+		Barrage = false,
+		Hamon = false,
+	}
+}
+
+-- Cleanup on re-execute
+if _G.AutoFarmCleanup then
+	pcall(_G.AutoFarmCleanup)
+end
+
+local _connections = {}
+local function trackConn(c)
+	table.insert(_connections, c)
+	return c
+end
+
+-- Loading/antiafk
+repeat task.wait() until game:IsLoaded()
+for i,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
+	v:Disable()
+end
+task.wait()
+
+-- Delete Killbricks
+if workspace:FindFirstChild("DAMAGE BARRIER") then
+	workspace["DAMAGE BARRIER"]:Destroy()
+	for i,v in pairs(workspace:GetChildren()) do
+		if v.Name == "Blightmore" then v:Destroy() end
+	end
+end
+
+-- Variables
+local Players = game:GetService('Players')
+local RunService = game:GetService('RunService')
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Player = Players.LocalPlayer
+local Prestiging = false
+local Noclip = nil
+local Clip = nil
+
+-- ANTI TP
+getgenv().antiTP_bypass = false
+getgenv().antiTP_threshold = 25
+local lastCF, reverting
+local hbConn, changedConn, diedConn
+
+local function getChar()
+	local char = Player.Character
+	if not char then return nil end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hrp or not hum then return nil end
+	return char, hrp, hum
+end
+
+local function getHRP()
+	local char = Player.Character
+	if not char then return nil end
+	return char:FindFirstChild("HumanoidRootPart")
+end
+
+local function stop()
+	if hbConn then hbConn:Disconnect() end
+	if changedConn then changedConn:Disconnect() end
+	if diedConn then diedConn:Disconnect() end
+end
+
+local function start()
+	local hrp
+	repeat local _, h = getChar() hrp = h task.wait() until hrp
+	stop()
+	lastCF = hrp.CFrame
+	hbConn = trackConn(RunService.Heartbeat:Connect(function()
+		if reverting then return end
+		local h = getHRP()
+		if h then lastCF = h.CFrame end
+	end))
+	changedConn = trackConn(hrp:GetPropertyChangedSignal('CFrame'):Connect(function()
+		if reverting then return end
+		if getgenv().antiTP_bypass then lastCF = hrp.CFrame return end
+		local delta = (hrp.Position - lastCF.Position).Magnitude
+		if delta < getgenv().antiTP_threshold then lastCF = hrp.CFrame return end
+		reverting = true
+		hrp.CFrame = lastCF
+		RunService.Heartbeat:Wait()
+		reverting = false
+	end))
+	diedConn = trackConn(Player.Character:FindFirstChildOfClass('Humanoid').Died:Connect(stop))
+end
+
+trackConn(Player.CharacterAdded:Connect(function(char)
+	repeat RunService.Heartbeat:Wait() until char:FindFirstChildOfClass('Humanoid')
+	repeat RunService.Heartbeat:Wait() until char:FindFirstChildOfClass('Humanoid').RootPart
+	start()
+end))
+trackConn(Player.CharacterRemoving:Connect(stop))
+if Player.Character then start() end
+
+local function faceDownAtMob()
+	if _G.AutoFarmSettings.Autofarm == false then return end
+	local char, hrp, hum = getChar()
+	if not char then return end
+	hum.AutoRotate = false
+	hum.PlatformStand = true
+	local bv = hrp:FindFirstChild("HoverBV")
+	if not bv then
+		bv = Instance.new("BodyVelocity")
+		bv.Name = "HoverBV"
+		bv.MaxForce = Vector3.new(8999999488, 8999999488, 8999999488)
+		bv.Velocity = Vector3.zero
+		bv.P = 1250
+		bv.Parent = hrp
+	end
+end
+
+function _G.safeTP(cf)
+	getgenv().antiTP_bypass = true
+	local hrp = getHRP()
+	if hrp then
+		hrp.CFrame = cf * CFrame.Angles(math.rad(-90), 0, 0)
+		faceDownAtMob()
+	end
+	task.wait()
+	getgenv().antiTP_bypass = false
+end
+
+local Level = 1
+
+local function getLevel()
+	local pg = Player:FindFirstChild("PlayerGui") if not pg then return Level end
+	local core = pg:FindFirstChild("CoreGUI") if not core then return Level end
+	local frame = core:FindFirstChild("Frame") if not frame then return Level end
+	local expbar = frame:FindFirstChild("EXPBAR") if not expbar then return Level end
+	local status = expbar:FindFirstChild("Status") if not status then return Level end
+	local lvl = status:FindFirstChild("Level") if not lvl then return Level end
+	if typeof(lvl.Value) == "number" then Level = lvl.Value end
+	return Level
+end
+
+local function getQuestData(level)
+	if level <= 9 then return "Thug Quest","Thug","ThugQuest"
+	elseif level <= 19 then return "Brute Quest","Brute","BruteQuest"
+	elseif level <= 29 then return "🦍😡💢 Quest","🦍","GorillaQuest"
+	elseif level <= 44 then return "Werewolf Quest","Werewolf","WerewolfQuest"
+	elseif level <= 59 then return "Zombie Quest","Zombie","ZombieQuest"
+	elseif level <= 79 then return "Vampire Quest","Vampire","VampireQuest"
+	else return "Golem Quest","HamonGolem","GolemQuest"
+	end
+end
+
+local function InvokeIfStandOutFalse()
+	if not _G.AutoFarmSettings.UseStand then return end
+	local character = Player and Player.Character
+	local status = character and character:FindFirstChild("Status")
+	local standOut = status and status:FindFirstChild("StandOut")
+	if standOut and standOut:IsA("BoolValue") and standOut.Value == false then
+		local gui = Player:FindFirstChild("PlayerGui")
+		local core = gui and gui:FindFirstChild("CoreGUI")
+		local events = core and core:FindFirstChild("Events")
+		local summon = events and events:FindFirstChild("SummonStand")
+		if summon then pcall(function() summon:InvokeServer() end) end
+	end
+end
+
+local function getFire(moveName)
+	local ok, result = pcall(function()
+		local pg = Player:FindFirstChild("PlayerGui") if not pg then return nil end
+		local core = pg:FindFirstChild("CoreGUI") if not core then return nil end
+		local standMoves = core:FindFirstChild("StandMoves") if not standMoves then return nil end
+		local move = standMoves:FindFirstChild(moveName) if not move then return nil end
+		return move:FindFirstChild("Fire")
+	end)
+	if ok then return result end
+end
+
+local function Punch() local f = getFire("Punch") if f then pcall(function() f:InvokeServer() end) end end
+local function Heavy() local f = getFire("HeavyPunch") if f then pcall(function() f:InvokeServer() end) end end
+local function Barrage() local f = getFire("Barrage") if f then pcall(function() f:InvokeServer() end) end end
+
+local function AllocateStat(statName)
+	local gui = Player:FindFirstChild("PlayerGui") if not gui then return end
+	local core = gui:FindFirstChild("CoreGUI") if not core then return end
+	local statsUI = core:FindFirstChild("Stats") if not statsUI then return end
+	local statsUI2 = statsUI:FindFirstChild("Stats") if not statsUI2 then return end
+	local remote = statsUI2:FindFirstChild("Stats") if not remote then return end
+	local skillpoints = statsUI2:FindFirstChild("aSkillPoints") if not skillpoints then return end
+	local number = tonumber(skillpoints.Text and skillpoints.Text:match("%d+")) or 1
+	if remote:IsA("RemoteFunction") then return remote:InvokeServer(statName, number) end
+end
+
+local function Prestige()
+	game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Prestige"):InvokeServer()
+end
+
+local function RedeemAllCodes()
+	for _, code in ipairs(Codes) do
+		pcall(function()
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("Events")
+				:WaitForChild("RedeemCode")
+				:InvokeServer(code)
+		end)
+		task.wait(0.1)
+	end
+end
+
+local function hasQuest(QuestName)
+	local pg = Player:FindFirstChild("PlayerGui") if not pg then return false end
+	for _, v in ipairs(pg:GetChildren()) do
+		if v.Name == "Quest" then
+			local qf = v:FindFirstChild("Quest")
+			if qf and qf:FindFirstChild(QuestName) then return true end
+		end
+	end
+	return false
+end
+
+local function findNPC(name)
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and obj.Name == name then return obj end
+	end
+end
+
+local function getMob(name)
+	for _, mob in ipairs(workspace:GetChildren()) do
+		if mob.Name == name then
+			local hum = mob:FindFirstChild("Humanoid")
+			local hrp = mob:FindFirstChild("HumanoidRootPart")
+			if mob:IsA("Model") and hum and hrp and hum.Health > 0 then return mob, hum, hrp end
+		end
+	end
+end
+
+local function isDead(mob)
+	local hum = mob and mob:FindFirstChildOfClass("Humanoid")
+	return (not hum) or hum.Health <= 0
+end
+
+local function attackMob(name)
+	local startTime = tick()
+	local mob, hum, hrp = getMob(name)
+	if not hum or not hrp then return end
+	while mob and not isDead(mob) and not Prestiging do
+		RunService.Heartbeat:Wait()
+		if tick() - startTime > 10 then break end
+		local char, plrhrp = getChar()
+		if not plrhrp or Prestiging then return end
+		task.defer(function() pcall(function() AllocateStat("Strength") end) end)
+		if not mob or hum.Health <= 0 then break end
+		_G.safeTP(hrp.CFrame + Vector3.new(0, _G.AutoFarmSettings.Height, 0))
+		task.defer(function()
+			if _G.AutoFarmSettings.Attacks.Heavy then pcall(Heavy) end
+			if _G.AutoFarmSettings.Attacks.Barrage then pcall(Barrage) end
+			pcall(Punch)
+		end)
+	end
+end
+
+local function SetupBaseplate()
+	-- Create baseplate first (if not already made)
+	if not workspace:FindFirstChild("Baseplate") then
+		local baseplate = Instance.new("Part")
+		baseplate.Name = "Baseplate"
+		baseplate.Size = Vector3.new(10000, 1, 10000)
+		baseplate.Position = Vector3.new(0, 250, 0)
+		baseplate.Anchored = true
+		baseplate.TopSurface = Enum.SurfaceType.Smooth
+		baseplate.BottomSurface = Enum.SurfaceType.Smooth
+		baseplate.Material = Enum.Material.Grass
+		baseplate.Parent = workspace
+	end
+	task.wait()
+	-- Then delete map if it exists
+	local map = workspace:FindFirstChild("Map")
+	if map then
+		map:Destroy()
+	end
+end
+
+function noclip()
+	if Clip == false then return end
+	Clip = false
+	Noclip = trackConn(RunService.Stepped:Connect(function()
+		if Clip == false and Player.Character then
+			for _,v in pairs(Player.Character:GetDescendants()) do
+				if v:IsA('BasePart') and v.CanCollide and v.Name ~= "Float" then
+					v.CanCollide = false
+				end
+			end
+		end
+		task.wait(0.2)
+	end))
+end
+
+function clip()
+	if Noclip then Noclip:Disconnect() end
+	Clip = true
+end
+
+Level = getLevel()
+
+-- ===================== UI =====================
+
+local function gradientanimation(grad)
+	local ti = TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1)
+	TweenService:Create(grad, ti, {Rotation = grad.Rotation + 360}):Play()
+end
+
+local function makeGradient(parent, c1, c2, name, animate)
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(c1[1],c1[2],c1[3])),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(c2[1],c2[2],c2[3]))
+	}
+	g.Rotation = -89
+	g.Parent = parent
+	if name then g.Name = name end
+	if animate then gradientanimation(g) end
+	return g
+end
+
+-- Root ScreenGui
+local Stand = Instance.new("ScreenGui")
+Stand.Name = "AutoFarmGUI"
+Stand.Parent = game:WaitForChild("CoreGui")
+Stand.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Outer border (draggable)
+local Frame_2 = Instance.new("Frame")
+Frame_2.Parent = Stand
+Frame_2.Draggable = true
+Frame_2.Selectable = true
+Frame_2.Active = true
+Frame_2.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Frame_2.BorderColor3 = Color3.fromRGB(255,255,255)
+Frame_2.BorderSizePixel = 3
+Frame_2.Position = UDim2.new(0.03, 0, 0.25, 0)
+Frame_2.Size = UDim2.new(0, 185, 0, 260)
+makeGradient(Frame_2, {255,60,255}, {255,175,255}, "Animate", true)
+
+-- Inner dark frame
+local Frame = Instance.new("Frame")
+Frame.Parent = Frame_2
+Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0,0,0,0)
+Frame.Size = UDim2.new(1,0,1,0)
+makeGradient(Frame, {4,4,4}, {38,38,38})
+
+-- Title bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Parent = Frame
+TitleBar.BackgroundTransparency = 1
+TitleBar.BorderSizePixel = 0
+TitleBar.Position = UDim2.new(0,0,0,0)
+TitleBar.Size = UDim2.new(1,0,0,22)
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TitleBar
+Title.BackgroundTransparency = 1
+Title.BorderSizePixel = 0
+Title.Position = UDim2.new(0,8,0,0)
+Title.Size = UDim2.new(1,-8,1,0)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextColor3 = Color3.fromRGB(255,175,255)
+Title.TextSize = 13
+Title.Text = "Stands Online  |  Caliburn"
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Divider under title
+local TitleDiv = Instance.new("Frame")
+TitleDiv.Parent = Frame
+TitleDiv.BackgroundColor3 = Color3.fromRGB(80,80,80)
+TitleDiv.BorderSizePixel = 0
+TitleDiv.Position = UDim2.new(0,5,0,22)
+TitleDiv.Size = UDim2.new(1,-10,0,1)
+
+-- ScrollingFrame
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Parent = Frame
+Scroll.BackgroundTransparency = 1
+Scroll.BorderSizePixel = 0
+Scroll.Position = UDim2.new(0,0,0,24)
+Scroll.Size = UDim2.new(1,0,1,-24)
+Scroll.CanvasSize = UDim2.new(0,0,0,0)
+Scroll.ScrollBarThickness = 3
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(255,60,255)
+Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+local ListLayout = Instance.new("UIListLayout")
+ListLayout.Parent = Scroll
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ListLayout.Padding = UDim.new(0,4)
+
+local Padding = Instance.new("UIPadding")
+Padding.Parent = Scroll
+Padding.PaddingTop = UDim.new(0,5)
+Padding.PaddingLeft = UDim.new(0,8)
+Padding.PaddingRight = UDim.new(0,8)
+
+local itemOrder = 0
+local function nextOrder()
+	itemOrder = itemOrder + 1
+	return itemOrder
+end
+
+local function makeSection(text)
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = Scroll
+	lbl.LayoutOrder = nextOrder()
+	lbl.BackgroundTransparency = 1
+	lbl.BorderSizePixel = 0
+	lbl.Size = UDim2.new(1,0,0,16)
+	lbl.Font = Enum.Font.SourceSansBold
+	lbl.TextColor3 = Color3.fromRGB(255,175,255)
+	lbl.TextSize = 12
+	lbl.Text = text
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+local function makeToggleRow(labelText, currentVal, onToggle)
+	local row = Instance.new("Frame")
+	row.Parent = Scroll
+	row.LayoutOrder = nextOrder()
+	row.BackgroundTransparency = 1
+	row.BorderSizePixel = 0
+	row.Size = UDim2.new(1,0,0,18)
+
+	local pill = Instance.new("Frame")
+	pill.Parent = row
+	pill.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	pill.BorderColor3 = Color3.fromRGB(255,255,255)
+	pill.BorderSizePixel = 0
+	pill.Position = UDim2.new(0,0,0.5,-6)
+	pill.Size = UDim2.new(0,12,0,12)
+	makeGradient(pill, {255,60,255}, {255,175,255}, "Animate", true)
+
+	local btn = Instance.new("ImageButton")
+	btn.Parent = pill
+	btn.BackgroundColor3 = currentVal and Color3.fromRGB(255,255,255) or Color3.fromRGB(0,0,0)
+	btn.BorderColor3 = Color3.fromRGB(255,255,255)
+	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = false
+	btn.Size = UDim2.new(0,10,0,10)
+	btn.Position = UDim2.new(0,1,0,1)
+	makeGradient(btn, {125,150,100}, {120,250,100}, "Animate", true)
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = row
+	lbl.BackgroundTransparency = 1
+	lbl.BorderSizePixel = 0
+	lbl.Position = UDim2.new(0,18,0,0)
+	lbl.Size = UDim2.new(1,-18,1,0)
+	lbl.Font = Enum.Font.SourceSans
+	lbl.TextColor3 = Color3.fromRGB(203,203,203)
+	lbl.TextSize = 13
+	lbl.Text = labelText
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local state = currentVal
+	local function doToggle()
+		state = not state
+		btn.BackgroundColor3 = state and Color3.fromRGB(255,255,255) or Color3.fromRGB(0,0,0)
+		onToggle(state)
+	end
+	btn.MouseButton1Click:Connect(doToggle)
+	lbl.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then doToggle() end end)
+end
+
+local function makeActionButton(labelText, onClick)
+	local row = Instance.new("Frame")
+	row.Parent = Scroll
+	row.LayoutOrder = nextOrder()
+	row.BackgroundTransparency = 1
+	row.BorderSizePixel = 0
+	row.Size = UDim2.new(1,0,0,24)
+
+	local border = Instance.new("Frame")
+	border.Parent = row
+	border.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	border.BorderSizePixel = 0
+	border.Size = UDim2.new(1,0,1,0)
+	makeGradient(border, {255,60,255}, {255,175,255}, "Animate", true)
+
+	local btn = Instance.new("TextButton")
+	btn.Parent = border
+	btn.BackgroundColor3 = Color3.fromRGB(18,8,18)
+	btn.BorderSizePixel = 0
+	btn.Position = UDim2.new(0,1,0,1)
+	btn.Size = UDim2.new(1,-2,1,-2)
+	btn.Font = Enum.Font.SourceSansBold
+	btn.TextColor3 = Color3.fromRGB(240,200,255)
+	btn.TextSize = 13
+	btn.Text = labelText
+	btn.AutoButtonColor = false
+
+	btn.MouseButton1Click:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80,20,80)}):Play()
+		task.wait(0.15)
+		TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(18,8,18)}):Play()
+		onClick()
+	end)
+end
+
+local function makeSliderRow(labelText, minVal, maxVal, currentVal, onChange)
+	local row = Instance.new("Frame")
+	row.Parent = Scroll
+	row.LayoutOrder = nextOrder()
+	row.BackgroundTransparency = 1
+	row.BorderSizePixel = 0
+	row.Size = UDim2.new(1,0,0,36)
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = row
+	lbl.BackgroundTransparency = 1
+	lbl.BorderSizePixel = 0
+	lbl.Position = UDim2.new(0,0,0,0)
+	lbl.Size = UDim2.new(1,0,0,16)
+	lbl.Font = Enum.Font.SourceSans
+	lbl.TextColor3 = Color3.fromRGB(203,203,203)
+	lbl.TextSize = 12
+	lbl.Text = labelText..": "..tostring(currentVal)
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local track = Instance.new("Frame")
+	track.Parent = row
+	track.BackgroundColor3 = Color3.fromRGB(55,55,55)
+	track.BorderSizePixel = 0
+	track.Position = UDim2.new(0,0,0,20)
+	track.Size = UDim2.new(1,0,0,6)
+
+	local fill = Instance.new("Frame")
+	fill.Parent = track
+	fill.BackgroundColor3 = Color3.fromRGB(255,60,255)
+	fill.BorderSizePixel = 0
+	fill.Size = UDim2.new((currentVal - minVal)/(maxVal - minVal), 0, 1, 0)
+	makeGradient(fill, {255,60,255}, {255,175,255}, nil, true)
+
+	local knob = Instance.new("TextButton")
+	knob.Parent = track
+	knob.BackgroundColor3 = Color3.fromRGB(220,220,220)
+	knob.BorderSizePixel = 0
+	knob.Text = ""
+	knob.Size = UDim2.new(0,10,0,12)
+	knob.Position = UDim2.new((currentVal - minVal)/(maxVal - minVal), -5, 0, -3)
+	knob.AutoButtonColor = false
+
+	local dragging = false
+	knob.MouseButton1Down:Connect(function() dragging = true end)
+	trackConn(UserInputService.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+	end))
+	trackConn(UserInputService.InputChanged:Connect(function(i)
+		if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+			local rel = math.clamp((i.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+			local val = math.round(minVal + rel * (maxVal - minVal))
+			local pct = (val - minVal) / (maxVal - minVal)
+			fill.Size = UDim2.new(pct, 0, 1, 0)
+			knob.Position = UDim2.new(pct, -5, 0, -3)
+			lbl.Text = labelText..": "..tostring(val)
+			onChange(val)
+		end
+	end))
+end
+
+local function makeDivider()
+	local d = Instance.new("Frame")
+	d.Parent = Scroll
+	d.LayoutOrder = nextOrder()
+	d.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	d.BorderSizePixel = 0
+	d.Size = UDim2.new(1,0,0,1)
+end
+
+-- ---- Build UI content ----
+
+makeSection("> AutoFarm")
+
+makeToggleRow("Autofarm", _G.AutoFarmSettings.Autofarm, function(v)
+	_G.AutoFarmSettings.Autofarm = v
+	local char, hrp, hum = getChar()
+	if v then
+		noclip()
+		if hum then hum.AutoRotate = false hum.PlatformStand = true end
+	else
+		clip()
+		task.defer(function()
+			for i = 1, 30 do
+				task.wait(0.5)
+				local c, h, hu = getChar()
+				if hu then hu.AutoRotate = true hu.PlatformStand = false end
+				if h then
+					local bv = h:FindFirstChild("HoverBV")
+					if bv then bv:Destroy() end
+				end
+			end
+		end)
+	end
+end)
+
+makeToggleRow("Auto Prestige", _G.AutoFarmSettings.AutoPrestige, function(v)
+	_G.AutoFarmSettings.AutoPrestige = v
+end)
+
+makeToggleRow("Use Stand", _G.AutoFarmSettings.UseStand, function(v)
+	_G.AutoFarmSettings.UseStand = v
+end)
+
+makeDivider()
+makeSection("> Moves")
+
+makeToggleRow("Heavy", _G.AutoFarmSettings.Attacks.Heavy, function(v)
+	_G.AutoFarmSettings.Attacks.Heavy = v
+end)
+
+makeToggleRow("Barrage", _G.AutoFarmSettings.Attacks.Barrage, function(v)
+	_G.AutoFarmSettings.Attacks.Barrage = v
+end)
+
+makeToggleRow("Hamon", _G.AutoFarmSettings.Attacks.Hamon, function(v)
+	_G.AutoFarmSettings.Attacks.Hamon = v
+end)
+
+makeDivider()
+makeSection("> Settings")
+
+makeSliderRow("Height", 0, 15, _G.AutoFarmSettings.Height, function(v)
+	_G.AutoFarmSettings.Height = v
+end)
+
+makeToggleRow("Blind", _G.AutoFarmSettings.Blind, function(v)
+	_G.AutoFarmSettings.Blind = v
+	game:GetService("RunService"):Set3dRenderingEnabled(not v)
+end)
+
+makeDivider()
+makeSection(" Misc")
+
+makeActionButton("Redeem Codes", function()
+	RedeemAllCodes()
+end)
+
+makeActionButton("Anti Lag", function()
+	sethiddenproperty(game:GetService("Lighting"), "Technology", Enum.Technology.Compatibility)
+	settings().Rendering.QualityLevel = 1
+	setfpscap(60)
+end)
+
+makeActionButton("Delete Map", function()
+	SetupBaseplate()
+end)
+
+makeActionButton("Anti Kick", function()
+	-- YOUR ANTI KICK CODE HERE
+end)
+
+-- ===================== MAIN LOOP =====================
+
+local _loopThread
+
+_G.AutoFarmCleanup = function()
+	_G.AutoFarmSettings.Autofarm = false
+	if _loopThread then pcall(task.cancel, _loopThread) end
+	for _, c in pairs(_connections) do
+		pcall(function() c:Disconnect() end)
+	end
+	table.clear(_connections)
+	stop()
+	clip()
+	local existing = game:GetService("CoreGui"):FindFirstChild("AutoFarmGUI")
+	if existing then existing:Destroy() end
+end
+
+_loopThread = task.spawn(function()
+	if _G.AutoFarmSettings.Autofarm then noclip() end
+	while true do
+		if _G.AutoFarmSettings.Autofarm then
+			if _G.AutoFarmSettings.AutoPrestige and Level >= 100 then
+				Prestiging = true
+				task.defer(function()
+					for i = 1, 10 do
+						faceDownAtMob()
+						task.wait(0.1)
+					end
+				end)
+				Prestige()
+				Level = getLevel()
+				task.wait(3)
+				Prestiging = false
+			end
+			Level = getLevel()
+			task.wait()
+			local questGiverName, mobName, questName = getQuestData(Level)
+			if not hasQuest(questName) then
+				repeat
+					local questGiver = findNPC(questGiverName)
+					if questGiver and questGiver:FindFirstChild("HumanoidRootPart") then
+						_G.safeTP(questGiver.HumanoidRootPart.CFrame + Vector3.new(0,3,0))
+						task.wait(0.3)
+						local prompt = questGiver:FindFirstChildWhichIsA("ProximityPrompt")
+						if prompt then fireproximityprompt(prompt) end
+					end
+					task.wait(0.5)
+				until hasQuest(questName)
+				task.wait()
+			end
+			InvokeIfStandOutFalse()
+			attackMob(mobName)
+		end
+		task.wait()
+	end
+end)
