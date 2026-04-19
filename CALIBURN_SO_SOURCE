@@ -17,6 +17,7 @@ _G.AutoFarmSettings = {
 	Attacks = {
 		Heavy = true,
 		Barrage = false,
+		Chop = false,
 		Hamon = false,
 	}
 }
@@ -195,6 +196,7 @@ end
 local function Punch() local f = getFire("Punch") if f then pcall(function() f:InvokeServer() end) end end
 local function Heavy() local f = getFire("HeavyPunch") if f then pcall(function() f:InvokeServer() end) end end
 local function Barrage() local f = getFire("Barrage") if f then pcall(function() f:InvokeServer() end) end end
+local function Chop() local f = getFire("Chop") if f then pcall(function() f:InvokeServer() end) end end
 
 local function AllocateStat(statName)
 	local gui = Player:FindFirstChild("PlayerGui") if not gui then return end
@@ -266,10 +268,11 @@ local function attackMob(name)
 		if not plrhrp or Prestiging then return end
 		task.defer(function() pcall(function() AllocateStat("Strength") end) end)
 		if not mob or hum.Health <= 0 then break end
-		_G.safeTP(hrp.CFrame + Vector3.new(0, _G.AutoFarmSettings.Height, 0))
+		_G.safeTP(hrp.CFrame + hrp.CFrame.UpVector * _G.AutoFarmSettings.Height)
 		task.defer(function()
 			if _G.AutoFarmSettings.Attacks.Heavy then pcall(Heavy) end
 			if _G.AutoFarmSettings.Attacks.Barrage then pcall(Barrage) end
+			if _G.AutoFarmSettings.Attacks.Chop then pcall(Chop) end
 			pcall(Punch)
 		end)
 	end
@@ -277,18 +280,50 @@ end
 
 local function SetupBaseplate()
 	-- Create baseplate first (if not already made)
-	if not workspace:FindFirstChild("Baseplate") then
-		local baseplate = Instance.new("Part")
-		baseplate.Name = "Baseplate"
-		baseplate.Size = Vector3.new(10000, 1, 10000)
-		baseplate.Position = Vector3.new(0, 250, 0)
-		baseplate.Anchored = true
-		baseplate.TopSurface = Enum.SurfaceType.Smooth
-		baseplate.BottomSurface = Enum.SurfaceType.Smooth
-		baseplate.Material = Enum.Material.Grass
-		baseplate.Parent = workspace
-	end
+  if not workspace:FindFirstChild("BaseplateFolder") then
+      local folder = Instance.new("Folder")
+      folder.Name = "BaseplateFolder"
+      folder.Parent = workspace
+  
+      local size = Vector3.new(2048, 1, 2048)
+      local spacing = 2048 -- match size so they touch
+      local centerPos = Vector3.new(0, 270, 0)
+  
+      local function createPlate(pos)
+          local p = Instance.new("Part")
+          p.Name = "Baseplate"
+          p.Size = size
+          p.Position = pos
+          p.Anchored = true
+          p.TopSurface = Enum.SurfaceType.Smooth
+          p.BottomSurface = Enum.SurfaceType.Smooth
+          p.Material = Enum.Material.Grass
+          p.Parent = folder
+      end
+  
+      -- center plate
+      createPlate(centerPos)
+  
+      -- surrounding 8 plates
+      for x = -1, 1 do
+          for z = -1, 1 do
+              if not (x == 0 and z == 0) then
+                  local offset = Vector3.new(x * spacing, 0, z * spacing)
+                  createPlate(centerPos + offset)
+              end
+          end
+      end
+  end
 	task.wait()
+	
+	if workspace:FindFirstChild("DAMAGE BARRIER") then
+	  workspace["DAMAGE BARRIER"]:Destroy()
+	  for i,v in pairs(workspace:GetChildren()) do
+	    if v.Name == "Blightmore" then v:Destroy() end
+    end
+  end
+
+	
 	-- Then delete map if it exists
 	local map = workspace:FindFirstChild("Map")
 	if map then
@@ -636,6 +671,10 @@ makeToggleRow("Barrage", _G.AutoFarmSettings.Attacks.Barrage, function(v)
 	_G.AutoFarmSettings.Attacks.Barrage = v
 end)
 
+makeToggleRow("Chop", _G.AutoFarmSettings.Attacks.Chop, function(v)
+	_G.AutoFarmSettings.Attacks.Chop = v
+end)
+
 makeToggleRow("Hamon", _G.AutoFarmSettings.Attacks.Hamon, function(v)
 	_G.AutoFarmSettings.Attacks.Hamon = v
 end)
@@ -691,41 +730,43 @@ _G.AutoFarmCleanup = function()
 end
 
 _loopThread = task.spawn(function()
+  pcall(function()
 	if _G.AutoFarmSettings.Autofarm then noclip() end
-	while true do
-		if _G.AutoFarmSettings.Autofarm then
-			if _G.AutoFarmSettings.AutoPrestige and Level >= 100 then
-				Prestiging = true
-				task.defer(function()
-					for i = 1, 10 do
-						faceDownAtMob()
-						task.wait(0.1)
-					end
-				end)
-				Prestige()
+		while true do
+			if _G.AutoFarmSettings.Autofarm then
+				if _G.AutoFarmSettings.AutoPrestige and Level >= 100 then
+					Prestiging = true
+					task.defer(function()
+						for i = 1, 10 do
+							faceDownAtMob()
+							task.wait(0.1)
+						end
+					end)
+					Prestige()
+					Level = getLevel()
+					task.wait(3)
+					Prestiging = false
+				end
 				Level = getLevel()
-				task.wait(3)
-				Prestiging = false
-			end
-			Level = getLevel()
-			task.wait()
-			local questGiverName, mobName, questName = getQuestData(Level)
-			if not hasQuest(questName) then
-				repeat
-					local questGiver = findNPC(questGiverName)
-					if questGiver and questGiver:FindFirstChild("HumanoidRootPart") then
-						_G.safeTP(questGiver.HumanoidRootPart.CFrame + Vector3.new(0,3,0))
-						task.wait(0.3)
-						local prompt = questGiver:FindFirstChildWhichIsA("ProximityPrompt")
-						if prompt then fireproximityprompt(prompt) end
-					end
-					task.wait(0.5)
-				until hasQuest(questName)
 				task.wait()
+				local questGiverName, mobName, questName = getQuestData(Level)
+				if not hasQuest(questName) then
+					repeat
+						local questGiver = findNPC(questGiverName)
+						if questGiver and questGiver:FindFirstChild("HumanoidRootPart") then
+							_G.safeTP(questGiver.HumanoidRootPart.CFrame + Vector3.new(0,3,0))
+							task.wait(0.3)
+							local prompt = questGiver:FindFirstChildWhichIsA("ProximityPrompt")
+							if prompt then fireproximityprompt(prompt) end
+						end
+						task.wait(0.5)
+					until hasQuest(questName)
+					task.wait()
+				end
+				InvokeIfStandOutFalse()
+				attackMob(mobName)
 			end
-			InvokeIfStandOutFalse()
-			attackMob(mobName)
+			task.wait()
 		end
-		task.wait()
-	end
+	end)
 end)
