@@ -698,7 +698,10 @@ makeDivider()
 makeSection(" Misc")
 
 makeActionButton("Redeem Codes", function()
-	RedeemAllCodes()
+	for i = 1, 10 do 
+		RedeemAllCodes()
+		task.wait(0.5)
+	end
 end)
 
 makeActionButton("Anti Lag", function()
