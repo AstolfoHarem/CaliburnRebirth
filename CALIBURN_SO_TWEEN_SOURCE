@@ -15,6 +15,7 @@ _G.AutoFarmSettings = {
 	TweenSpeed = 8,
 	UseStand = true,
 	Height = 10,
+	TPDistance = 10,
 	Blind = false,
 	Attacks = {
 		Heavy = true,
@@ -116,7 +117,7 @@ function _G.safeTP(targetCFrame)
 
 		local distance = (plrHRP.Position - Vector3.new(tX, tY, tZ)).Magnitude
 
-		if distance > 10 then
+		if distance > _G.AutoFarmSettings.TPDistance then
 			local tweenSpeed = distance / (_G.AutoFarmSettings.TweenSpeed * 10)
 			faceDownAtMob()
 			TweenService:Create(plrHRP, TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear), {
@@ -668,6 +669,11 @@ end)
 makeDivider()
 makeSection(" Settings")
 
+makeToggleRow("Blind", _G.AutoFarmSettings.Blind, function(v)
+	_G.AutoFarmSettings.Blind = v
+	game:GetService("RunService"):Set3dRenderingEnabled(not v)
+end)
+
 makeSliderRow("Height", 0, 15, _G.AutoFarmSettings.Height, function(v)
 	_G.AutoFarmSettings.Height = v
 end)
@@ -676,9 +682,8 @@ makeSliderRow("Tween Speed", 1, 20, _G.AutoFarmSettings.Height, function(v)
 	_G.AutoFarmSettings.TweenSpeed = v
 end)
 
-makeToggleRow("Blind", _G.AutoFarmSettings.Blind, function(v)
-	_G.AutoFarmSettings.Blind = v
-	game:GetService("RunService"):Set3dRenderingEnabled(not v)
+makeSliderRow("Safe Teleport Distance", 5, 100, _G.AutoFarmSettings.Height, function(v)
+	_G.AutoFarmSettings.TPDistance = v
 end)
 
 makeDivider()
