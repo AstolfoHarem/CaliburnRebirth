@@ -8,7 +8,7 @@ _G.AutoFarmSettings = {
 	RollCostItemName = "Rokakaka Fruit",
 	RollDelay = 1,
 	WantedStands = {
-		-- Big Stand
+		-- 1. Big Stand
 		{
 			Size = 1.21,
 			Body = nil,
@@ -19,7 +19,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- GDOH
+		-- 2. GDOH
 		{
 			Size = 1.2,
 			Body = nil,
@@ -30,7 +30,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- Icicle Stand
+		-- 3. Icicle Stand
 		{
 			Size = nil,
 			Body = nil,
@@ -41,7 +41,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- KCR/Atum
+		-- 4. KCR/Atum
 		{
 			Size = nil,
 			Body = nil,
@@ -52,7 +52,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- WR/Witch
+		-- 5. WR/Witch
 		{
 			Size = nil,
 			Body = nil,
@@ -63,7 +63,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- KQ/SKR
+		-- 6. KQ/SKR
 		{
 			Size = nil,
 			Body = nil,
@@ -74,7 +74,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- TWR/UWR
+		-- 7. TWR/UWR
 		{
 			Size = nil,
 			Body = nil,
@@ -85,7 +85,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- PHR/Scarecrow
+		-- 8. PHR/Scarecrow
 		{
 			Size = nil,
 			Body = nil,
@@ -96,7 +96,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- GER
+		-- 9. GER
 		{
 			Size = nil,
 			Body = nil,
@@ -107,7 +107,18 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- D4CR
+		-- 10. CMR
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Gun", "Revolver"},
+				Move2 = {"Gravity Repulse"},
+			}
+		},
+
+		-- 11. D4CR
 		{
 			Size = nil,
 			Body = nil,
@@ -118,7 +129,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- Rabbit Fighter
+		-- 12. Rabbit Fighter
 		{
 			Size = nil,
 			Body = nil,
@@ -129,7 +140,7 @@ _G.AutoFarmSettings = {
 			}
 		},
 
-		-- STW
+		-- 13. STW
 		{
 			Size = nil,
 			Body = "Shadow The World",
