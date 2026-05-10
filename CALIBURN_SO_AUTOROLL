@@ -149,6 +149,7 @@ local ReplicatedStorage  = game:GetService("ReplicatedStorage")
 local TweenService       = game:GetService("TweenService")
 local UserInputService   = game:GetService("UserInputService")
 local CoreGui            = game:GetService("CoreGui")
+local HttpService        = game:GetService("HttpService")
 
 local LocalPlayer        = Players.LocalPlayer
 local PlayerGui          = LocalPlayer:WaitForChild("PlayerGui")
@@ -176,6 +177,45 @@ local _loopThread
 local function trackConn(c)
 	table.insert(_connections, c)
 	return c
+end
+
+----------------------------------------------------------------
+-- NOTIFICATIONS (console + optional Discord webhook)
+----------------------------------------------------------------
+
+local function sendWebhook(message)
+	local url = _G.WebhookURL
+	if not url or url == "" then return end
+
+	-- Pick whichever HTTP-request function the executor exposes.
+	local requester = (syn and syn.request) or http_request or request
+		or (http and http.request)
+	if not requester then return end
+
+	pcall(function()
+		requester({
+			Url = url,
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body = HttpService:JSONEncode({
+				embeds = {{
+					author = { name = "Caliburn Auto Roll" },
+					title = LocalPlayer.Name,
+					description = message,
+				}}
+			}),
+		})
+	end)
+end
+
+local function notify(message)
+	print(message)
+	task.spawn(sendWebhook, message)
+end
+
+local function notifyWarn(message)
+	warn(message)
+	task.spawn(sendWebhook, message)
 end
 
 ----------------------------------------------------------------
@@ -894,19 +934,19 @@ _loopThread = task.spawn(function()
 		if matched then
 			settings.AutoRoll = false
 			if autoRollSetter then autoRollSetter(false) end
-			print(("[AutoRoll] Wanted stand found (\"%s\"). Stopping."):format(matchName))
+			notify(("[AutoRoll] Wanted stand found (\"%s\"). Stopping."):format(matchName))
 			continue
 		end
 
 		-- 3. Make sure we have a Rokakaka and a Stand Arrow (buys if not).
 		if not ensureItemInStock(settings.RollCostItemName) then
-			warn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(settings.RollCostItemName))
+			notifyWarn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(settings.RollCostItemName))
 			settings.AutoRoll = false
 			if autoRollSetter then autoRollSetter(false) end
 			continue
 		end
 		if not ensureItemInStock(settings.StandArrow) then
-			warn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(settings.StandArrow))
+			notifyWarn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(settings.StandArrow))
 			settings.AutoRoll = false
 			if autoRollSetter then autoRollSetter(false) end
 			continue
