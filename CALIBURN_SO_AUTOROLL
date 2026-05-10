@@ -23,8 +23,8 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Harpoon", "Spear Throw", "Sword Shot"},
-				Move2 = {"Knife Throw", "Scale Throw"},
+				Move1 = {"Harpoon"},
+				Move2 = {"Knife Throw"},
 			}
 		},
 
@@ -43,7 +43,7 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Harpoon", "Bearing Shot", "Spear Throw", "Sword Shot", "Blinding Bubble"},
+				Move1 = {"Harpoon", "Bearing Shot", "Blinding Bubble"},
 				Move2 = {"Future Sight"},
 			}
 		},
@@ -53,7 +53,7 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Primary Bomb", "Fireball", "Internal Bomb"},
+				Move1 = {"Primary Bomb", "Fireball"},
 				Move2 = {"Lightning Bolt"},
 			}
 		},
@@ -63,8 +63,8 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Primary Bomb", "Internal Bomb"},
-				Move2 = {"Sword Combat", "Bubble Bomb", "Coin Toss", "Grenade", "Sizzle", "Dynamite", "Tri-Bubble Bomb"},
+				Move1 = {"Primary Bomb"},
+				Move2 = {"Sword Combat", "Bubble Bomb", "Grenade", "Sizzle"},
 			}
 		},
 
@@ -74,7 +74,7 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Moves = {
 				Move1 = {"Road Roller"},
-				Move2 = {"Knife Throw", "Future Sight", "Clone", "Ground Slam", "Time Movement", "Scale Throw"},
+				Move2 = {"Knife Throw", "Future Sight", "Clone", "Ground Slam", "Time Movement"},
 			}
 		},
 
@@ -93,7 +93,7 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Gun", "Revolver", "Life Punch"},
+				Move1 = {"Gun", "Life Punch"},
 				Move2 = {"Tree"},
 			}
 		},
@@ -103,7 +103,7 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Gun", "Revolver"},
+				Move1 = {"Gun"},
 				Move2 = {"Gravity Repulse"},
 			}
 		},
@@ -113,7 +113,7 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Gun", "Revolver"},
+				Move1 = {"Gun"},
 				Move2 = {"Clone"},
 			}
 		},
@@ -230,6 +230,44 @@ local function listContains(list, value)
 	return false
 end
 
+-- Move aliases — moves in the same group are treated as the same move when
+-- checking criteria. Listing any one of them in a Wanted Stand's Move1/Move2
+-- will also match any other move from its group on the rolled stand.
+local MoveAliases = {
+	{"Sword Combat", "Arrow Combat", "Pole Combat", "Paintbrush Combat", "Bayonet Combat"},
+	{"Primary Bomb", "Internal Bomb"},
+	{"Gun", "Revolver", "Flintlock", "Blunderbuss"},
+	{"Knife Throw", "Scale Throw"},
+	{"Bubble Bomb", "Tri-Bubble Bomb"},
+	{"Grenade", "Dynamite", "Skull Bomb", "Potion Throw", "Coin Toss"},
+	{"Harpoon", "Spear Throw", "Sword Shot"},
+}
+
+-- Build a name -> group lookup so checks are O(1).
+local MoveGroupOf = {}
+for _, group in ipairs(MoveAliases) do
+	for _, name in ipairs(group) do
+		MoveGroupOf[name] = group
+	end
+end
+
+-- True if two move names refer to the same underlying move (same alias group),
+-- or are exactly equal.
+local function movesEquivalent(a, b)
+	if a == b then return true end
+	local groupA = MoveGroupOf[a]
+	return groupA ~= nil and groupA == MoveGroupOf[b]
+end
+
+-- Like listContains, but treats aliased move names as equivalent.
+local function moveListContains(list, move)
+	if not list then return false end
+	for _, candidate in ipairs(list) do
+		if movesEquivalent(candidate, move) then return true end
+	end
+	return false
+end
+
 local function standMatchesCriteria(stand, criteria)
 	if criteria.Size ~= nil then
 		if stand.Size == nil or stand.Size < criteria.Size then
@@ -247,10 +285,10 @@ local function standMatchesCriteria(stand, criteria)
 
 	local moves = criteria.Moves
 	if moves then
-		if moves.Move1 ~= nil and not listContains(moves.Move1, stand.Move1) then
+		if moves.Move1 ~= nil and not moveListContains(moves.Move1, stand.Move1) then
 			return false
 		end
-		if moves.Move2 ~= nil and not listContains(moves.Move2, stand.Move2) then
+		if moves.Move2 ~= nil and not moveListContains(moves.Move2, stand.Move2) then
 			return false
 		end
 	end
