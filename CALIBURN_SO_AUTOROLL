@@ -26,7 +26,7 @@ _G.AutoFarmSettings = {
 			Head = nil,
 			Moves = {
 				Move1 = {"Harpoon", "Spear Throw", "Sword Shot"},
-				Move2 = {"Future Sight", "Ground Slam", "Time Movement", "Sword Combat", "Lightning Bolt", "Knife Throw", "Clone", "Gravity Repulse", "Tree"},
+				Move2 = {"Knife Throw", "Scale Throw"},
 			}
 		},
 
