@@ -241,6 +241,7 @@ local MoveAliases = {
 	{"Bubble Bomb", "Tri-Bubble Bomb"},
 	{"Grenade", "Dynamite", "Skull Bomb", "Potion Throw", "Coin Toss"},
 	{"Harpoon", "Spear Throw", "Sword Shot"},
+	{"Bearing Shot", "Baseball", "Cannonball"},
 }
 
 -- Build a name -> group lookup so checks are O(1).
@@ -463,6 +464,9 @@ local function useStandArrow()
 		character:WaitForChild("HumanoidRootPart")
 	end
 
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return false end
+
 	-- Close the Trade UI right before rolling. Only if it's still around.
 	local trade = PlayerGui:FindFirstChild("Trade")
 	if trade then
@@ -476,14 +480,19 @@ local function useStandArrow()
 		end
 	end
 
+	-- The server rejects rolls if any other tool is already in the character,
+	-- so unequip whatever's currently held before equipping the arrow.
+	pcall(function()
+		humanoid:UnequipTools()
+	end)
+
+	-- Find the arrow AFTER unequipping (so it's reliably back in Backpack).
 	local arrow = findArrow()
 	if not arrow then return false end
 
 	local ok = pcall(function()
-		if arrow.Parent ~= character then
-			arrow.Parent = character
-			task.wait(1)
-		end
+		humanoid:EquipTool(arrow)
+		task.wait(1)
 		RollingItemRemote:InvokeServer()
 	end)
 	return ok
