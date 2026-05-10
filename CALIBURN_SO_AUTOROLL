@@ -2,7 +2,7 @@
 -- SETTINGS
 ----------------------------------------------------------------
 
-_G.AutoFarmSettings = {
+_G.AutoRollSettings = {
 	AutoRoll = false,
 	StandArrow = "Stand Arrow",
 	RollCostItemName = "Rokakaka Fruit",
@@ -37,7 +37,7 @@ _G.AutoFarmSettings = {
 			Head = nil,
 			Moves = {
 				Move1 = {"Icicle"},
-				Move2 = {"Future Sight", "Ground Slam", "Time Movement", "Sword Combat", "Lightning Bolt", "Knife Throw", "Clone", "Gravity Repulse", "Tree"},
+				Move2 = {"Future Sight", "Ground Slam", "Time Movement", "Sword Combat", "Lightning Bolt", "Knife Throw", "Clone", "Gravity Repulse", "Tree", "Aging Gas"},
 			}
 		},
 
@@ -58,7 +58,7 @@ _G.AutoFarmSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Primary Bomb", "Fireball"},
+				Move1 = {"Primary Bomb", "Fireball", "Internal Bomb"},
 				Move2 = {"Lightning Bolt"},
 			}
 		},
@@ -233,7 +233,7 @@ end
 
 local function isWantedStand(stand)
 	if not stand then return false, nil end
-	for i, criteria in ipairs(_G.AutoFarmSettings.WantedStands) do
+	for i, criteria in ipairs(_G.AutoRollSettings.WantedStands) do
 		if standMatchesCriteria(stand, criteria) then
 			return true, i
 		end
@@ -354,12 +354,29 @@ local function ensureItemInStock(itemName)
 	return false
 end
 
+-- Returns a sorted, deduplicated list of names found under workspace.Purchasable.
+local function getUniquePurchasableNames()
+	local result = {}
+	local purchasable = workspace:FindFirstChild("Purchasable")
+	if not purchasable then return result end
+
+	local seen = {}
+	for _, item in ipairs(purchasable:GetChildren()) do
+		if not seen[item.Name] then
+			seen[item.Name] = true
+			table.insert(result, item.Name)
+		end
+	end
+	table.sort(result)
+	return result
+end
+
 ----------------------------------------------------------------
 -- ROLLING
 ----------------------------------------------------------------
 
 local function findArrow()
-	local arrowName = _G.AutoFarmSettings.StandArrow
+	local arrowName = _G.AutoRollSettings.StandArrow
 	local backpack = LocalPlayer:FindFirstChild("Backpack")
 	if backpack then
 		local a = backpack:FindFirstChild(arrowName)
@@ -741,6 +758,41 @@ local function makeDropdownRow(labelText, options, currentVal, onChange)
 	end)
 end
 
+local function makeActionButton(labelText, onClick)
+	local row = Instance.new("Frame")
+	row.Parent = Scroll
+	row.LayoutOrder = nextOrder()
+	row.BackgroundTransparency = 1
+	row.BorderSizePixel = 0
+	row.Size = UDim2.new(1,0,0,22)
+
+	local border = Instance.new("Frame")
+	border.Parent = row
+	border.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	border.BorderSizePixel = 0
+	border.Size = UDim2.new(1,0,1,0)
+	makeGradient(border, {255,60,255}, {255,175,255}, "Animate", true)
+
+	local btn = Instance.new("TextButton")
+	btn.Parent = border
+	btn.BackgroundColor3 = Color3.fromRGB(18,8,18)
+	btn.BorderSizePixel = 0
+	btn.Position = UDim2.new(0,1,0,1)
+	btn.Size = UDim2.new(1,-2,1,-2)
+	btn.Font = Enum.Font.SourceSansBold
+	btn.TextColor3 = Color3.fromRGB(240,200,255)
+	btn.TextSize = 12
+	btn.Text = labelText
+	btn.AutoButtonColor = false
+
+	btn.MouseButton1Click:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80,20,80)}):Play()
+		task.wait(0.1)
+		TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(18,8,18)}):Play()
+		onClick()
+	end)
+end
+
 local function makeDivider()
 	local d = Instance.new("Frame")
 	d.Parent = Scroll
@@ -777,16 +829,16 @@ local ArrowOptions = {
 
 makeSection(" Auto Roll")
 
-autoRollSetter = makeToggleRow("Auto Roll", _G.AutoFarmSettings.AutoRoll, function(v)
-	_G.AutoFarmSettings.AutoRoll = v
+autoRollSetter = makeToggleRow("Auto Roll", _G.AutoRollSettings.AutoRoll, function(v)
+	_G.AutoRollSettings.AutoRoll = v
 end)
 
-makeSliderRow("Roll Delay", 1, 10, _G.AutoFarmSettings.RollDelay, function(v)
-	_G.AutoFarmSettings.RollDelay = v
+makeSliderRow("Roll Delay", 1, 10, _G.AutoRollSettings.RollDelay, function(v)
+	_G.AutoRollSettings.RollDelay = v
 end)
 
-makeDropdownRow("Rolling Item", ArrowOptions, _G.AutoFarmSettings.StandArrow, function(v)
-	_G.AutoFarmSettings.StandArrow = v
+makeDropdownRow("Rolling Item", ArrowOptions, _G.AutoRollSettings.StandArrow, function(v)
+	_G.AutoRollSettings.StandArrow = v
 end)
 
 makeDivider()
@@ -807,13 +859,22 @@ updateLastStandDisplay = function(stand)
 	sizeLbl.Text  = "Scale: "  .. tostring(stand.Size  or "-")
 end
 
+makeDivider()
+makeSection(" Shop")
+
+for _, itemName in ipairs(getUniquePurchasableNames()) do
+	makeActionButton(itemName, function()
+		buyItem(itemName)
+	end)
+end
+
 ----------------------------------------------------------------
 -- CLEANUP HOOK
 ----------------------------------------------------------------
 
 _G.AutoRollCleanup = function()
-	if _G.AutoFarmSettings then
-		_G.AutoFarmSettings.AutoRoll = false
+	if _G.AutoRollSettings then
+		_G.AutoRollSettings.AutoRoll = false
 	end
 	if _loopThread then
 		pcall(task.cancel, _loopThread)
@@ -832,7 +893,7 @@ end
 
 _loopThread = task.spawn(function()
 	while task.wait(0.1) do
-		local settings = _G.AutoFarmSettings
+		local settings = _G.AutoRollSettings
 		if not settings.AutoRoll then
 			continue
 		end
