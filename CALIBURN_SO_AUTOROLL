@@ -8,8 +8,7 @@ _G.AutoRollSettings = {
 	RollCostItemName = "Rokakaka Fruit",
 	RollDelay = 1,
 	WantedStands = {
-		-- 1. Big Stand
-		{
+		["Big Stand"] = {
 			Size = 1.21,
 			Body = nil,
 			Head = nil,
@@ -19,8 +18,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 2. GDOH
-		{
+		["GDOH"] = {
 			Size = 1.2,
 			Body = nil,
 			Head = nil,
@@ -30,8 +28,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 3. Icicle Stand
-		{
+		["Icicle Stand"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -41,8 +38,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 4. KCR/Atum
-		{
+		["KCR/Atum"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -52,8 +48,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 5. WR/Witch
-		{
+		["WR/Witch"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -63,8 +58,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 6. KQ/SKR
-		{
+		["KQ/SKR"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -74,8 +68,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 7. TWR/UWR
-		{
+		["TWR/UWR"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -85,8 +78,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 8. PHR/Scarecrow
-		{
+		["PHR/Scarecrow"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -96,8 +88,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 9. GER
-		{
+		["GER"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -107,8 +98,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 10. CMR
-		{
+		["CMR"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -118,8 +108,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 11. D4CR
-		{
+		["D4CR"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -129,8 +118,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 12. Rabbit Fighter
-		{
+		["Rabbit Fighter"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
@@ -140,8 +128,7 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		-- 13. STW
-		{
+		["STW"] = {
 			Size = nil,
 			Body = "Shadow The World",
 			Head = "Shadow The World",
@@ -231,11 +218,12 @@ local function standMatchesCriteria(stand, criteria)
 	return true
 end
 
+-- Returns (true, name) for the first matching named entry, or (false, nil).
 local function isWantedStand(stand)
 	if not stand then return false, nil end
-	for i, criteria in ipairs(_G.AutoRollSettings.WantedStands) do
+	for name, criteria in pairs(_G.AutoRollSettings.WantedStands) do
 		if standMatchesCriteria(stand, criteria) then
-			return true, i
+			return true, name
 		end
 	end
 	return false, nil
@@ -902,11 +890,11 @@ _loopThread = task.spawn(function()
 		local stand = getCurrentStand()
 
 		-- 2. Already on a wanted stand? Stop.
-		local matched, matchIndex = isWantedStand(stand)
+		local matched, matchName = isWantedStand(stand)
 		if matched then
 			settings.AutoRoll = false
 			if autoRollSetter then autoRollSetter(false) end
-			print(("[AutoRoll] Wanted stand found (entry #%d). Stopping."):format(matchIndex))
+			print(("[AutoRoll] Wanted stand found (\"%s\"). Stopping."):format(matchName))
 			continue
 		end
 
