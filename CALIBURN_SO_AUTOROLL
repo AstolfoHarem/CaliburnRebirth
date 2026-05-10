@@ -234,14 +234,15 @@ end
 -- checking criteria. Listing any one of them in a Wanted Stand's Move1/Move2
 -- will also match any other move from its group on the rolled stand.
 local MoveAliases = {
-	{"Sword Combat", "Arrow Combat", "Pole Combat", "Paintbrush Combat", "Bayonet Combat"},
+	{"Sword Combat", "Arrow Combat", "Pole Combat", "Paintbrush Combat", "Bayonet Combat", "Scythe Combat"},
 	{"Primary Bomb", "Internal Bomb"},
-	{"Gun", "Revolver", "Flintlock", "Blunderbuss"},
-	{"Knife Throw", "Scale Throw"},
+	{"Gun", "Revolver", "Flintlock", "Blunderbuss", "Wand"},
+	{"Knife Throw", "Scale Throw", "Rose Throw"},
 	{"Bubble Bomb", "Tri-Bubble Bomb"},
-	{"Grenade", "Dynamite", "Skull Bomb", "Potion Throw", "Coin Toss"},
+	{"Grenade", "Dynamite", "Skull Bomb", "Potion Potion", "Coin Toss"},
 	{"Harpoon", "Spear Throw", "Sword Shot"},
 	{"Bearing Shot", "Baseball", "Cannonball"},
+	{"Star Finger", "Heel Extend"}
 }
 
 -- Build a name -> group lookup so checks are O(1).
