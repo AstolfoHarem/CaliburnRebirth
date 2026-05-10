@@ -1,0 +1,865 @@
+----------------------------------------------------------------
+-- SETTINGS
+----------------------------------------------------------------
+
+_G.AutoFarmSettings = {
+	AutoRoll = false,
+	StandArrow = "Stand Arrow",
+	RollCostItemName = "Rokakaka Fruit",
+	RollDelay = 3,
+	WantedStands = {
+		-- Big Stand
+		{
+			Size = 1.21,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = nil,
+				Move2 = nil,
+			}
+		},
+
+		-- GDOH
+		{
+			Size = 1.2,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Harpoon", "Spear Throw", "Sword Shot"},
+				Move2 = {"Future Sight", "Ground Slam", "Time Movement", "Sword Combat", "Lightning Bolt", "Knife Throw", "Clone", "Gravity Repulse", "Tree"},
+			}
+		},
+
+		-- Icicle Stand
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Icicle"},
+				Move2 = {"Future Sight", "Ground Slam", "Time Movement", "Sword Combat", "Lightning Bolt", "Knife Throw", "Clone", "Gravity Repulse", "Tree"},
+			}
+		},
+
+		-- KCR/Atum
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Harpoon", "Bearing Shot", "Spear Throw", "Sword Shot", "Blinding Bubble"},
+				Move2 = {"Future Sight"},
+			}
+		},
+
+		-- WR/Witch
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Primary Bomb", "Fireball"},
+				Move2 = {"Lightning Bolt"},
+			}
+		},
+
+		-- KQ/SKR
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Primary Bomb", "Internal Bomb"},
+				Move2 = {"Sword Combat", "Bubble Bomb", "Coin Toss", "Grenade", "Sizzle", "Dynamite", "Tri-Bubble Bomb"},
+			}
+		},
+
+		-- TWR/UWR
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Road Roller"},
+				Move2 = {"Knife Throw", "Future Sight", "Clone", "Ground Slam", "Time Movement", "Scale Throw"},
+			}
+		},
+
+		-- PHR/Scarecrow
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Virus Capsule"},
+				Move2 = {"Virus Gas"},
+			}
+		},
+
+		-- GER
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Gun", "Revolver", "Life Punch"},
+				Move2 = {"Tree"},
+			}
+		},
+
+		-- D4CR
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Gun", "Revolver"},
+				Move2 = {"Clone"},
+			}
+		},
+
+		-- Rabbit Fighter
+		{
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Life Punch"},
+				Move2 = {"Future Sight"},
+			}
+		},
+
+		-- STW
+		{
+			Size = nil,
+			Body = "Shadow The World",
+			Head = "Shadow The World",
+			Moves = {
+				Move1 = nil,
+				Move2 = nil,
+			}
+		},
+	}
+}
+
+----------------------------------------------------------------
+-- SERVICES & REFERENCES
+----------------------------------------------------------------
+
+local Players            = game:GetService("Players")
+local ReplicatedStorage  = game:GetService("ReplicatedStorage")
+local TweenService       = game:GetService("TweenService")
+local UserInputService   = game:GetService("UserInputService")
+local CoreGui            = game:GetService("CoreGui")
+
+local LocalPlayer        = Players.LocalPlayer
+local PlayerGui          = LocalPlayer:WaitForChild("PlayerGui")
+
+local Events             = ReplicatedStorage:WaitForChild("Events")
+local ViewStandRemote    = Events:WaitForChild("ViewStand")
+local RollingItemRemote  = Events:WaitForChild("RollingItem")
+
+-- Forward-declared by the UI section so logic can update display elements
+-- without depending on file order.
+local updateLastStandDisplay
+local autoRollSetter
+
+----------------------------------------------------------------
+-- CLEANUP OF PRIOR INSTANCE (re-execute support)
+----------------------------------------------------------------
+
+if _G.AutoRollCleanup then
+	pcall(_G.AutoRollCleanup)
+end
+
+local _connections = {}
+local _loopThread
+
+local function trackConn(c)
+	table.insert(_connections, c)
+	return c
+end
+
+----------------------------------------------------------------
+-- CRITERIA MATCHING
+----------------------------------------------------------------
+
+local function listContains(list, value)
+	if not list then return false end
+	for _, v in ipairs(list) do
+		if v == value then return true end
+	end
+	return false
+end
+
+local function standMatchesCriteria(stand, criteria)
+	if criteria.Size ~= nil then
+		if stand.Size == nil or stand.Size < criteria.Size then
+			return false
+		end
+	end
+
+	if criteria.Body ~= nil and stand.Body ~= criteria.Body then
+		return false
+	end
+
+	if criteria.Head ~= nil and stand.Head ~= criteria.Head then
+		return false
+	end
+
+	local moves = criteria.Moves
+	if moves then
+		if moves.Move1 ~= nil and not listContains(moves.Move1, stand.Move1) then
+			return false
+		end
+		if moves.Move2 ~= nil and not listContains(moves.Move2, stand.Move2) then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function isWantedStand(stand)
+	if not stand then return false, nil end
+	for i, criteria in ipairs(_G.AutoFarmSettings.WantedStands) do
+		if standMatchesCriteria(stand, criteria) then
+			return true, i
+		end
+	end
+	return false, nil
+end
+
+----------------------------------------------------------------
+-- STAND INFO (read from Trade GUI)
+----------------------------------------------------------------
+
+local function parseAfterColon(text)
+	if not text then return nil end
+	return text:match("^[^:]+:%s*(.+)$")
+end
+
+local function parseScale(text)
+	if not text then return nil end
+	return tonumber(text:match("x([%d%.]+)"))
+end
+
+local function readStandFromTradeGui(trade)
+	local frame = trade:FindFirstChild("Frame")
+	local stats = frame and frame:FindFirstChild("Stats")
+	if not stats then return nil end
+
+	local bodyLabel  = stats:FindFirstChild("StandBody")
+	local headLabel  = stats:FindFirstChild("StandHead")
+	local scaleLabel = stats:FindFirstChild("StandScale")
+	local movesFrame = stats:FindFirstChild("Moves")
+	if not (bodyLabel and headLabel and scaleLabel and movesFrame) then
+		return nil
+	end
+
+	local m1Frame = movesFrame:FindFirstChild("4")
+	local m2Frame = movesFrame:FindFirstChild("5")
+	local m1Text  = m1Frame and m1Frame:FindFirstChild("Text2")
+	local m2Text  = m2Frame and m2Frame:FindFirstChild("Text2")
+	if not (m1Text and m2Text) then return nil end
+
+	local size  = parseScale(scaleLabel.Text)
+	local body  = parseAfterColon(bodyLabel.Text)
+	local head  = parseAfterColon(headLabel.Text)
+	local move1 = m1Text.Text
+	local move2 = m2Text.Text
+
+	if not size or not body or not head
+		or move1 == nil or move1 == ""
+		or move2 == nil or move2 == ""
+	then
+		return nil
+	end
+
+	return {
+		Size  = size,
+		Body  = body,
+		Head  = head,
+		Move1 = move1,
+		Move2 = move2,
+	}
+end
+
+local function getCurrentStand()
+	while true do
+		local trade = PlayerGui:FindFirstChild("Trade")
+
+		if not trade then
+			pcall(function()
+				ViewStandRemote:InvokeServer(LocalPlayer)
+			end)
+			task.wait(0.25)
+		else
+			local stand = readStandFromTradeGui(trade)
+			if stand then
+				if updateLastStandDisplay then
+					pcall(updateLastStandDisplay, stand)
+				end
+				return stand
+			end
+			task.wait(0.1)
+		end
+	end
+end
+
+----------------------------------------------------------------
+-- INVENTORY & PURCHASING
+----------------------------------------------------------------
+
+local function getInventoryCount(itemName)
+	local inventory = LocalPlayer:FindFirstChild("Inventory")
+	if not inventory then return 0 end
+	local item = inventory:FindFirstChild(itemName)
+	if not item then return 0 end
+	return item.Value or 0
+end
+
+local function buyItem(itemName)
+	local purchasable = workspace:FindFirstChild("Purchasable")
+	if not purchasable then return false end
+	local item = purchasable:FindFirstChild(itemName)
+	if not item then return false end
+	local ok = pcall(function()
+		fireclickdetector(item:FindFirstChild("ClickDetector"))
+	end)
+	return ok
+end
+
+local function ensureItemInStock(itemName)
+	if getInventoryCount(itemName) > 0 then return true end
+
+	for _ = 1, 5 do
+		buyItem(itemName)
+		for _ = 1, 5 do
+			if getInventoryCount(itemName) > 0 then return true end
+			task.wait(0.2)
+		end
+	end
+	return false
+end
+
+----------------------------------------------------------------
+-- ROLLING
+----------------------------------------------------------------
+
+local function findArrow()
+	local arrowName = _G.AutoFarmSettings.StandArrow
+	local backpack = LocalPlayer:FindFirstChild("Backpack")
+	if backpack then
+		local a = backpack:FindFirstChild(arrowName)
+		if a then return a end
+	end
+	local character = LocalPlayer.Character
+	if character then
+		local a = character:FindFirstChild(arrowName)
+		if a then return a end
+	end
+	return nil
+end
+
+local function useStandArrow()
+	local character = LocalPlayer.Character
+	if not character or not character.Parent or not character:FindFirstChild("HumanoidRootPart") then
+		character = LocalPlayer.CharacterAdded:Wait()
+		character:WaitForChild("HumanoidRootPart")
+	end
+
+	-- Close the Trade UI right before rolling. Only if it's still around.
+	local trade = PlayerGui:FindFirstChild("Trade")
+	if trade then
+		local events = trade:FindFirstChild("Events")
+		local closeRemote = events and events:FindFirstChild("Close")
+		if closeRemote then
+			pcall(function()
+				closeRemote:FireServer()
+			end)
+			task.wait(1)
+		end
+	end
+
+	local arrow = findArrow()
+	if not arrow then return false end
+
+	local ok = pcall(function()
+		if arrow.Parent ~= character then
+			arrow.Parent = character
+			task.wait(1)
+		end
+		RollingItemRemote:InvokeServer()
+	end)
+	return ok
+end
+
+----------------------------------------------------------------
+-- USER INTERFACE
+----------------------------------------------------------------
+
+local function gradientAnimation(grad)
+	local ti = TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1)
+	TweenService:Create(grad, ti, {Rotation = grad.Rotation + 360}):Play()
+end
+
+local function makeGradient(parent, c1, c2, name, animate)
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(c1[1],c1[2],c1[3])),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(c2[1],c2[2],c2[3]))
+	}
+	g.Rotation = -89
+	g.Parent = parent
+	if name then g.Name = name end
+	if animate then gradientAnimation(g) end
+	return g
+end
+
+-- Root ScreenGui
+local Stand = Instance.new("ScreenGui")
+Stand.Name = "AutoRollGUI"
+Stand.Parent = CoreGui
+Stand.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Outer border (draggable)
+local Frame_2 = Instance.new("Frame")
+Frame_2.Parent = Stand
+Frame_2.Draggable = true
+Frame_2.Selectable = true
+Frame_2.Active = true
+Frame_2.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Frame_2.BorderColor3 = Color3.fromRGB(255,255,255)
+Frame_2.BorderSizePixel = 3
+Frame_2.Position = UDim2.new(0.97, -200, 0.25, 0)
+Frame_2.Size = UDim2.new(0, 200, 0, 290)
+makeGradient(Frame_2, {255,60,255}, {255,175,255}, "Animate", true)
+
+-- Inner dark frame
+local Frame = Instance.new("Frame")
+Frame.Parent = Frame_2
+Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0,0,0,0)
+Frame.Size = UDim2.new(1,0,1,0)
+makeGradient(Frame, {4,4,4}, {38,38,38})
+
+-- Title bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Parent = Frame
+TitleBar.BackgroundTransparency = 1
+TitleBar.BorderSizePixel = 0
+TitleBar.Position = UDim2.new(0,0,0,0)
+TitleBar.Size = UDim2.new(1,0,0,22)
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TitleBar
+Title.BackgroundTransparency = 1
+Title.BorderSizePixel = 0
+Title.Position = UDim2.new(0,8,0,0)
+Title.Size = UDim2.new(1,-8,1,0)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextColor3 = Color3.fromRGB(255,175,255)
+Title.TextSize = 13
+Title.Text = "Caliburn  |  Stands Online"
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Divider under title
+local TitleDiv = Instance.new("Frame")
+TitleDiv.Parent = Frame
+TitleDiv.BackgroundColor3 = Color3.fromRGB(80,80,80)
+TitleDiv.BorderSizePixel = 0
+TitleDiv.Position = UDim2.new(0,5,0,22)
+TitleDiv.Size = UDim2.new(1,-10,0,1)
+
+-- ScrollingFrame
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Parent = Frame
+Scroll.BackgroundTransparency = 1
+Scroll.BorderSizePixel = 0
+Scroll.Position = UDim2.new(0,0,0,24)
+Scroll.Size = UDim2.new(1,0,1,-24)
+Scroll.CanvasSize = UDim2.new(0,0,0,0)
+Scroll.ScrollBarThickness = 3
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(255,60,255)
+Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+local ListLayout = Instance.new("UIListLayout")
+ListLayout.Parent = Scroll
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ListLayout.Padding = UDim.new(0,4)
+
+local Padding = Instance.new("UIPadding")
+Padding.Parent = Scroll
+Padding.PaddingTop = UDim.new(0,5)
+Padding.PaddingLeft = UDim.new(0,8)
+Padding.PaddingRight = UDim.new(0,8)
+
+local itemOrder = 0
+local function nextOrder()
+	itemOrder = itemOrder + 1
+	return itemOrder
+end
+
+local function makeSection(text)
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = Scroll
+	lbl.LayoutOrder = nextOrder()
+	lbl.BackgroundTransparency = 1
+	lbl.BorderSizePixel = 0
+	lbl.Size = UDim2.new(1,0,0,16)
+	lbl.Font = Enum.Font.SourceSansBold
+	lbl.TextColor3 = Color3.fromRGB(255,175,255)
+	lbl.TextSize = 12
+	lbl.Text = text
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+local function makeToggleRow(labelText, currentVal, onToggle)
+	local row = Instance.new("Frame")
+	row.Parent = Scroll
+	row.LayoutOrder = nextOrder()
+	row.BackgroundTransparency = 1
+	row.BorderSizePixel = 0
+	row.Size = UDim2.new(1,0,0,18)
+
+	local pill = Instance.new("Frame")
+	pill.Parent = row
+	pill.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	pill.BorderColor3 = Color3.fromRGB(255,255,255)
+	pill.BorderSizePixel = 0
+	pill.Position = UDim2.new(0,0,0.5,-6)
+	pill.Size = UDim2.new(0,12,0,12)
+	makeGradient(pill, {255,60,255}, {255,175,255}, "Animate", true)
+
+	local btn = Instance.new("ImageButton")
+	btn.Parent = pill
+	btn.BackgroundColor3 = currentVal and Color3.fromRGB(255,255,255) or Color3.fromRGB(0,0,0)
+	btn.BorderColor3 = Color3.fromRGB(255,255,255)
+	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = false
+	btn.Size = UDim2.new(0,10,0,10)
+	btn.Position = UDim2.new(0,1,0,1)
+	makeGradient(btn, {125,150,100}, {120,250,100}, "Animate", true)
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = row
+	lbl.BackgroundTransparency = 1
+	lbl.BorderSizePixel = 0
+	lbl.Position = UDim2.new(0,18,0,0)
+	lbl.Size = UDim2.new(1,-18,1,0)
+	lbl.Font = Enum.Font.SourceSans
+	lbl.TextColor3 = Color3.fromRGB(203,203,203)
+	lbl.TextSize = 13
+	lbl.Text = labelText
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local state = currentVal
+	local function setState(newState)
+		state = newState
+		btn.BackgroundColor3 = state and Color3.fromRGB(255,255,255) or Color3.fromRGB(0,0,0)
+	end
+	local function doToggle()
+		setState(not state)
+		onToggle(state)
+	end
+	btn.MouseButton1Click:Connect(doToggle)
+	lbl.InputBegan:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then doToggle() end
+	end)
+	return setState
+end
+
+local function makeSliderRow(labelText, minVal, maxVal, currentVal, onChange)
+	local row = Instance.new("Frame")
+	row.Parent = Scroll
+	row.LayoutOrder = nextOrder()
+	row.BackgroundTransparency = 1
+	row.BorderSizePixel = 0
+	row.Size = UDim2.new(1,0,0,36)
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = row
+	lbl.BackgroundTransparency = 1
+	lbl.BorderSizePixel = 0
+	lbl.Position = UDim2.new(0,0,0,0)
+	lbl.Size = UDim2.new(1,0,0,16)
+	lbl.Font = Enum.Font.SourceSans
+	lbl.TextColor3 = Color3.fromRGB(203,203,203)
+	lbl.TextSize = 12
+	lbl.Text = labelText..": "..tostring(currentVal)
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local track = Instance.new("Frame")
+	track.Parent = row
+	track.BackgroundColor3 = Color3.fromRGB(55,55,55)
+	track.BorderSizePixel = 0
+	track.Position = UDim2.new(0,0,0,20)
+	track.Size = UDim2.new(1,0,0,6)
+
+	local fill = Instance.new("Frame")
+	fill.Parent = track
+	fill.BackgroundColor3 = Color3.fromRGB(255,60,255)
+	fill.BorderSizePixel = 0
+	fill.Size = UDim2.new((currentVal - minVal)/(maxVal - minVal), 0, 1, 0)
+	makeGradient(fill, {255,60,255}, {255,175,255}, nil, true)
+
+	local knob = Instance.new("TextButton")
+	knob.Parent = track
+	knob.BackgroundColor3 = Color3.fromRGB(220,220,220)
+	knob.BorderSizePixel = 0
+	knob.Text = ""
+	knob.Size = UDim2.new(0,10,0,12)
+	knob.Position = UDim2.new((currentVal - minVal)/(maxVal - minVal), -5, 0, -3)
+	knob.AutoButtonColor = false
+
+	local dragging = false
+	knob.MouseButton1Down:Connect(function() dragging = true end)
+	trackConn(UserInputService.InputEnded:Connect(function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+	end))
+	trackConn(UserInputService.InputChanged:Connect(function(i)
+		if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+			local rel = math.clamp((i.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+			local val = math.round(minVal + rel * (maxVal - minVal))
+			local pct = (val - minVal) / (maxVal - minVal)
+			fill.Size = UDim2.new(pct, 0, 1, 0)
+			knob.Position = UDim2.new(pct, -5, 0, -3)
+			lbl.Text = labelText..": "..tostring(val)
+			onChange(val)
+		end
+	end))
+end
+
+local function makeDropdownRow(labelText, options, currentVal, onChange)
+	local row = Instance.new("Frame")
+	row.Parent = Scroll
+	row.LayoutOrder = nextOrder()
+	row.BackgroundTransparency = 1
+	row.BorderSizePixel = 0
+	row.Size = UDim2.new(1,0,0,38)
+	row.ClipsDescendants = false
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = row
+	lbl.BackgroundTransparency = 1
+	lbl.Position = UDim2.new(0,0,0,0)
+	lbl.Size = UDim2.new(1,0,0,14)
+	lbl.Font = Enum.Font.SourceSans
+	lbl.TextColor3 = Color3.fromRGB(203,203,203)
+	lbl.TextSize = 12
+	lbl.Text = labelText
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local border = Instance.new("Frame")
+	border.Parent = row
+	border.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	border.BorderSizePixel = 0
+	border.Position = UDim2.new(0,0,0,16)
+	border.Size = UDim2.new(1,0,0,20)
+	makeGradient(border, {255,60,255}, {255,175,255}, "Animate", true)
+
+	local btn = Instance.new("TextButton")
+	btn.Parent = border
+	btn.BackgroundColor3 = Color3.fromRGB(18,8,18)
+	btn.BorderSizePixel = 0
+	btn.Position = UDim2.new(0,1,0,1)
+	btn.Size = UDim2.new(1,-2,1,-2)
+	btn.Font = Enum.Font.SourceSansBold
+	btn.TextColor3 = Color3.fromRGB(240,200,255)
+	btn.TextSize = 12
+	btn.Text = ">  " .. tostring(currentVal)
+	btn.AutoButtonColor = false
+
+	-- Options list — scrolls internally if too tall.
+	local visibleCount = math.min(#options, 5)
+	local optHeight = visibleCount * 18
+
+	local optWrap = Instance.new("ScrollingFrame")
+	optWrap.Parent = row
+	optWrap.BackgroundColor3 = Color3.fromRGB(18,8,18)
+	optWrap.BorderColor3 = Color3.fromRGB(255,60,255)
+	optWrap.BorderSizePixel = 1
+	optWrap.Position = UDim2.new(0,0,0,38)
+	optWrap.Size = UDim2.new(1,0,0,optHeight)
+	optWrap.CanvasSize = UDim2.new(0,0,0,#options * 18)
+	optWrap.ScrollBarThickness = 3
+	optWrap.ScrollBarImageColor3 = Color3.fromRGB(255,60,255)
+	optWrap.Visible = false
+	optWrap.ZIndex = 5
+
+	local optList = Instance.new("UIListLayout")
+	optList.Parent = optWrap
+	optList.SortOrder = Enum.SortOrder.LayoutOrder
+
+	local function close()
+		optWrap.Visible = false
+		row.Size = UDim2.new(1,0,0,38)
+	end
+	local function open()
+		optWrap.Visible = true
+		row.Size = UDim2.new(1,0,0,38 + optHeight + 2)
+	end
+
+	for i, opt in ipairs(options) do
+		local optBtn = Instance.new("TextButton")
+		optBtn.Parent = optWrap
+		optBtn.BackgroundColor3 = Color3.fromRGB(28,18,28)
+		optBtn.BorderSizePixel = 0
+		optBtn.Size = UDim2.new(1,0,0,18)
+		optBtn.Font = Enum.Font.SourceSans
+		optBtn.TextColor3 = Color3.fromRGB(220,200,240)
+		optBtn.TextSize = 12
+		optBtn.Text = opt
+		optBtn.LayoutOrder = i
+		optBtn.AutoButtonColor = false
+		optBtn.ZIndex = 5
+
+		optBtn.MouseEnter:Connect(function() optBtn.BackgroundColor3 = Color3.fromRGB(60,30,60) end)
+		optBtn.MouseLeave:Connect(function() optBtn.BackgroundColor3 = Color3.fromRGB(28,18,28) end)
+		optBtn.MouseButton1Click:Connect(function()
+			btn.Text = ">  " .. opt
+			close()
+			onChange(opt)
+		end)
+	end
+
+	btn.MouseButton1Click:Connect(function()
+		if optWrap.Visible then close() else open() end
+	end)
+end
+
+local function makeDivider()
+	local d = Instance.new("Frame")
+	d.Parent = Scroll
+	d.LayoutOrder = nextOrder()
+	d.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	d.BorderSizePixel = 0
+	d.Size = UDim2.new(1,0,0,1)
+end
+
+local function makeInfoRow(initialText)
+	local lbl = Instance.new("TextLabel")
+	lbl.Parent = Scroll
+	lbl.LayoutOrder = nextOrder()
+	lbl.BackgroundTransparency = 1
+	lbl.BorderSizePixel = 0
+	lbl.Size = UDim2.new(1,0,0,15)
+	lbl.Font = Enum.Font.SourceSans
+	lbl.TextColor3 = Color3.fromRGB(203,203,203)
+	lbl.TextSize = 12
+	lbl.Text = initialText
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+	lbl.TextTruncate = Enum.TextTruncate.AtEnd
+	return lbl
+end
+
+-- ---- Build content ----
+
+local ArrowOptions = {
+	"Stand Arrow", "Easter Egg", "Golden Egg",
+	"Part 3 DISC", "Part 4 DISC", "Part 5 DISC",
+	"Part 6 DISC", "Part 7 DISC", "Part 8 DISC",
+	"Refined Arrow", "Requiem Arrow", "Ice Cream",
+}
+
+makeSection(" Auto Roll")
+
+autoRollSetter = makeToggleRow("Auto Roll", _G.AutoFarmSettings.AutoRoll, function(v)
+	_G.AutoFarmSettings.AutoRoll = v
+end)
+
+makeSliderRow("Roll Delay", 1, 10, _G.AutoFarmSettings.RollDelay, function(v)
+	_G.AutoFarmSettings.RollDelay = v
+end)
+
+makeDropdownRow("Rolling Item", ArrowOptions, _G.AutoFarmSettings.StandArrow, function(v)
+	_G.AutoFarmSettings.StandArrow = v
+end)
+
+makeDivider()
+makeSection(" Last Rolled Stand")
+
+local bodyLbl  = makeInfoRow("Body: -")
+local headLbl  = makeInfoRow("Head: -")
+local move1Lbl = makeInfoRow("Move 1: -")
+local move2Lbl = makeInfoRow("Move 2: -")
+local sizeLbl  = makeInfoRow("Scale: -")
+
+updateLastStandDisplay = function(stand)
+	if not stand then return end
+	bodyLbl.Text  = "Body: "   .. tostring(stand.Body  or "-")
+	headLbl.Text  = "Head: "   .. tostring(stand.Head  or "-")
+	move1Lbl.Text = "Move 1: " .. tostring(stand.Move1 or "-")
+	move2Lbl.Text = "Move 2: " .. tostring(stand.Move2 or "-")
+	sizeLbl.Text  = "Scale: "  .. tostring(stand.Size  or "-")
+end
+
+----------------------------------------------------------------
+-- CLEANUP HOOK
+----------------------------------------------------------------
+
+_G.AutoRollCleanup = function()
+	if _G.AutoFarmSettings then
+		_G.AutoFarmSettings.AutoRoll = false
+	end
+	if _loopThread then
+		pcall(task.cancel, _loopThread)
+	end
+	for _, c in pairs(_connections) do
+		pcall(function() c:Disconnect() end)
+	end
+	table.clear(_connections)
+	local existing = CoreGui:FindFirstChild("AutoRollGUI")
+	if existing then existing:Destroy() end
+end
+
+----------------------------------------------------------------
+-- MAIN LOOP
+----------------------------------------------------------------
+
+_loopThread = task.spawn(function()
+	while task.wait(0.1) do
+		local settings = _G.AutoFarmSettings
+		if not settings.AutoRoll then
+			continue
+		end
+
+		-- 1. Read the current stand (waits until Trade GUI gives valid data).
+		local stand = getCurrentStand()
+
+		-- 2. Already on a wanted stand? Stop.
+		local matched, matchIndex = isWantedStand(stand)
+		if matched then
+			settings.AutoRoll = false
+			if autoRollSetter then autoRollSetter(false) end
+			print(("[AutoRoll] Wanted stand found (entry #%d). Stopping."):format(matchIndex))
+			continue
+		end
+
+		-- 3. Make sure we have a Rokakaka and a Stand Arrow (buys if not).
+		if not ensureItemInStock(settings.RollCostItemName) then
+			warn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(settings.RollCostItemName))
+			settings.AutoRoll = false
+			if autoRollSetter then autoRollSetter(false) end
+			continue
+		end
+		if not ensureItemInStock(settings.StandArrow) then
+			warn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(settings.StandArrow))
+			settings.AutoRoll = false
+			if autoRollSetter then autoRollSetter(false) end
+			continue
+		end
+
+		-- 4. Roll. If something errors, retry on the next tick.
+		local ok = useStandArrow()
+		if not ok then
+			task.wait(1)
+			continue
+		end
+
+		-- 5. Wait for the roll/respawn to complete before reading again.
+		task.wait(settings.RollDelay)
+	end
+end)
