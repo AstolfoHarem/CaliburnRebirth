@@ -6,7 +6,7 @@ _G.AutoFarmSettings = {
 	AutoRoll = false,
 	StandArrow = "Stand Arrow",
 	RollCostItemName = "Rokakaka Fruit",
-	RollDelay = 3,
+	RollDelay = 1,
 	WantedStands = {
 		-- Big Stand
 		{
