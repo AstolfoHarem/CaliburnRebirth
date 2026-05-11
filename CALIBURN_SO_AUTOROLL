@@ -74,7 +74,7 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Moves = {
 				Move1 = {"Road Roller"},
-				Move2 = {"Knife Throw", "Future Sight", "Clone", "Ground Slam", "Time Movement", "Sword Combat"},
+				Move2 = {"Knife Throw", "Future Sight", "Clone", "Ground Slam", "Time Movement"},
 			}
 		},
 
@@ -327,6 +327,19 @@ local function readStandFromTradeGui(trade)
 	local frame = trade:FindFirstChild("Frame")
 	local stats = frame and frame:FindFirstChild("Stats")
 	if not stats then return nil end
+
+	-- If the Stats panel is hidden, the player currently has no stand.
+	-- Return a sentinel "no stand" reading so the caller proceeds to roll
+	-- instead of looping forever waiting for a stand that isn't there.
+	if stats.Visible == false then
+		return {
+			Size  = 0,
+			Body  = "None",
+			Head  = "None",
+			Move1 = "None",
+			Move2 = "None",
+		}
+	end
 
 	local bodyLabel  = stats:FindFirstChild("StandBody")
 	local headLabel  = stats:FindFirstChild("StandHead")
