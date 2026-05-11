@@ -6,7 +6,7 @@ _G.AutoRollSettings = {
 	AutoRoll = false,
 	StandArrow = "Stand Arrow",
 	RollCostItemName = "Rokakaka Fruit",
-	RollDelay = 1,
+	RollDelay = 2,
 	WantedStands = {
 		["Big Stand"] = {
 			Size = 1.21,
@@ -502,7 +502,18 @@ local function useStandArrow()
 
 	-- Find the arrow AFTER unequipping (so it's reliably back in Backpack).
 	local arrow = findArrow()
-	if not arrow then return false end
+	if not arrow then
+		-- The game occasionally deletes the stand arrow tool from Backpack
+		-- while still counting it in inventory. Buy another and respawn to
+		-- recover; the main loop will retry on the next iteration.
+		if getInventoryCount(_G.AutoRollSettings.StandArrow) > 0 then
+			buyItem(_G.AutoRollSettings.StandArrow)
+			pcall(function()
+				humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+			end)
+		end
+		return false
+	end
 
 	local ok = pcall(function()
 		humanoid:EquipTool(arrow)
