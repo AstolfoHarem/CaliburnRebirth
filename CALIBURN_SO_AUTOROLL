@@ -264,7 +264,7 @@ end
 local MoveAliases = {
 	{"Sword Combat", "Arrow Combat", "Pole Combat", "Paintbrush Combat", "Bayonet Combat", "Scythe Combat", "Bow Combat", "Pen Combat", "Cutlass Combat", "Trident Combat", "Shovel Combat", "Umbrella Combat", "Cane Combat"},
 	{"Primary Bomb", "Internal Bomb", "Time Bomb"},
-	{"Gun", "Revolver", "Flintlock", "Blunderbuss", "Wand", "Shotgun", "Water Gun"},
+	{"Gun", "Revolver", "Flintlock", "Blunderbuss", "Wand", "Shotgun", "Water Gun", "Tommy Gun"},
 	{"Knife Throw", "Scale Throw", "Rose Throw", "Sharp Balloon"},
 	{"Bubble Bomb", "Tri-Bubble Bomb"},
 	{"Grenade", "Dynamite", "Skull Bomb", "Poison Potion", "Coin Toss", "Grenade Launcher"},
