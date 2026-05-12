@@ -7,6 +7,15 @@ _G.AutoRollSettings = {
 	StandArrow = "Stand Arrow",
 	RollCostItemName = "Rokakaka Fruit",
 	RollDelay = 1,
+	MovesetBlacklist = {
+		{ Move1 = {"Stand Jump"},    Move2 = {"Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Tree", "Lightning Bolt"} },
+		{ Move1 = {"Encourage"},     Move2 = {"Knife Throw", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Gravity Repulse", "Tree"} },
+		{ Move1 = {"Glide"},         Move2 = {"Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Gravity Repulse", "Lightning Bolt"} },
+		{ Move1 = {"Healing Mode"},  Move2 = {"Knife Throw", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Aging Gas", "Gravity Repulse", "Lightning Bolt"} },
+		{ Move1 = {"Softening Mode"}, Move2 = {"Acid Spit", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Gravity Repulse", "Tree", "Lightning Bolt"} },
+		{ Move1 = {"Air Suck"}},
+		{ Move1 = {"Block"},    Move2 = {"Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Tree", "Lightning Bolt"} },
+	},
 	WantedStands = {
 		["Big Stand"] = {
 			Size = 1.21,
@@ -357,6 +366,28 @@ local function isWantedStand(stand)
 		end
 	end
 	return false, nil
+end
+
+-- True if the stand's moveset matches any entry in the moveset blacklist.
+-- Each entry uses the same Move1/Move2 semantics as WantedStands.Moves:
+-- both move lists are AND'd, lists are OR within themselves, nil = ignore,
+-- and the alias system applies.
+local function isMovesetBlacklisted(stand)
+	if not stand then return false end
+	local blacklist = _G.AutoRollSettings.MovesetBlacklist
+	if not blacklist then return false end
+	for _, entry in ipairs(blacklist) do
+		local m1Match = entry.Move1 == nil or moveListContains(entry.Move1, stand.Move1)
+		local m2Match = entry.Move2 == nil or moveListContains(entry.Move2, stand.Move2)
+		if m1Match and m2Match then
+			-- Don't fire on an empty entry ({} or {Move1=nil, Move2=nil}) —
+			-- that would blacklist literally every stand.
+			if entry.Move1 ~= nil or entry.Move2 ~= nil then
+				return true
+			end
+		end
+	end
+	return false
 end
 
 ----------------------------------------------------------------
@@ -1060,8 +1091,11 @@ _loopThread = task.spawn(function()
 		-- 1. Read the current stand (waits until Trade GUI gives valid data).
 		local stand = getCurrentStand()
 
-		-- 2. Already on a wanted stand? Stop.
+		-- 2. Already on a wanted stand? Stop. (Unless its moveset is blacklisted.)
 		local matched, matchName = isWantedStand(stand)
+		if matched and isMovesetBlacklisted(stand) then
+			matched = false
+		end
 		if matched then
 			settings.AutoRoll = false
 			if autoRollSetter then autoRollSetter(false) end
