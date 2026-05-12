@@ -43,7 +43,29 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Harpoon", "Bearing Shot", "Blinding Bubble"},
+				Move1 = {"Harpoon", "Bearing Shot"},
+				Move2 = {"Future Sight"},
+			}
+		},
+
+		["KCREF"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = false,
+			Moves = {
+				Move1 = {"Blinding Bubble"},
+				Move2 = {"Future Sight"},
+			}
+		},
+
+		["KCRHead"] = {
+			Size = nil,
+			Body = nil,
+			Head = "King Crimson",
+			Suit = false,
+			Moves = {
+				Move1 = nil,
 				Move2 = {"Future Sight"},
 			}
 		},
