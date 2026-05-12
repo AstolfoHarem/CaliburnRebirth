@@ -108,7 +108,7 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Suit = false,
 			Moves = {
-				Move1 = {"Gun"},
+				Move1 = {"Gun", "Primary Bomb"},
 				Move2 = {"Gravity Repulse"},
 			}
 		},
