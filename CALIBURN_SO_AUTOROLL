@@ -6,7 +6,7 @@ _G.AutoRollSettings = {
 	AutoRoll = false,
 	StandArrow = "Stand Arrow",
 	RollCostItemName = "Rokakaka Fruit",
-	RollDelay = 2,
+	RollDelay = 1,
 	WantedStands = {
 		["Big Stand"] = {
 			Size = 1.21,
@@ -62,6 +62,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
+			Suit = false,
 			Moves = {
 				Move1 = {"Primary Bomb"},
 				Move2 = {"Sword Combat", "Bubble Bomb", "Grenade", "Sizzle"},
@@ -72,6 +73,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
+			Suit = false,
 			Moves = {
 				Move1 = {"Road Roller"},
 				Move2 = {"Knife Throw", "Future Sight", "Clone", "Ground Slam", "Time Movement"},
@@ -82,6 +84,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
+			Suit = false,
 			Moves = {
 				Move1 = {"Virus Capsule"},
 				Move2 = {"Virus Gas"},
@@ -92,6 +95,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
+			Suit = false,
 			Moves = {
 				Move1 = {"Gun", "Life Punch"},
 				Move2 = {"Tree"},
@@ -102,6 +106,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
+			Suit = false,
 			Moves = {
 				Move1 = {"Gun"},
 				Move2 = {"Gravity Repulse"},
@@ -122,6 +127,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
+			Suit = false,
 			Moves = {
 				Move1 = {"Life Punch"},
 				Move2 = {"Future Sight"},
@@ -135,6 +141,28 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = nil,
 				Move2 = nil,
+			}
+		},
+
+		["Hunter"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = true,
+			Moves = {
+				Move1 = {"Gun"},
+				Move2 = {"Knife Throw"},
+			}
+		},
+
+		["Larry"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = true,
+			Moves = {
+				Move1 = {"Stand Jump"},
+				Move2 = {"Future Sight"},
 			}
 		},
 	}
@@ -234,15 +262,19 @@ end
 -- checking criteria. Listing any one of them in a Wanted Stand's Move1/Move2
 -- will also match any other move from its group on the rolled stand.
 local MoveAliases = {
-	{"Sword Combat", "Arrow Combat", "Pole Combat", "Paintbrush Combat", "Bayonet Combat", "Scythe Combat"},
-	{"Primary Bomb", "Internal Bomb"},
-	{"Gun", "Revolver", "Flintlock", "Blunderbuss", "Wand"},
-	{"Knife Throw", "Scale Throw", "Rose Throw"},
+	{"Sword Combat", "Arrow Combat", "Pole Combat", "Paintbrush Combat", "Bayonet Combat", "Scythe Combat", "Bow Combat", "Pen Combat", "Cutlass Combat", "Trident Combat"},
+	{"Primary Bomb", "Internal Bomb", "Time Bomb"},
+	{"Gun", "Revolver", "Flintlock", "Blunderbuss", "Wand", "Shotgun", "Water Gun"},
+	{"Knife Throw", "Scale Throw", "Rose Throw", "Sharp Balloon"},
 	{"Bubble Bomb", "Tri-Bubble Bomb"},
-	{"Grenade", "Dynamite", "Skull Bomb", "Potion Potion", "Coin Toss"},
-	{"Harpoon", "Spear Throw", "Sword Shot"},
-	{"Bearing Shot", "Baseball", "Cannonball"},
-	{"Star Finger", "Heel Extend"}
+	{"Grenade", "Dynamite", "Skull Bomb", "Poison Potion", "Coin Toss", "Grenade Launcher"},
+	{"Harpoon", "Spear Throw", "Sword Shot", "Balloon Sword", "Bow Shot", "Trident Throw"},
+	{"Bearing Shot", "Baseball Throw", "Cannon Ball", "Balloon Shot", "Snowball Throw"},
+	{"Star Finger", "Heel Extend"},
+	{"Virus Capsule", "Superfast Jellyfish"},
+	{"Sheer Heart Attack", "Rat Bomb", "Balloon Dog"},
+	{"Over Heaven Blast", "Ocean Blast"}, 
+	{"Reality Overwrite", "Stand Steal"},
 }
 
 -- Build a name -> group lookup so checks are O(1).
@@ -271,6 +303,12 @@ local function moveListContains(list, move)
 end
 
 local function standMatchesCriteria(stand, criteria)
+	if criteria.Suit ~= nil then
+		if stand.Suit ~= criteria.Suit then
+			return false
+		end
+	end
+
 	if criteria.Size ~= nil then
 		if stand.Size == nil or stand.Size < criteria.Size then
 			return false
@@ -328,6 +366,13 @@ local function readStandFromTradeGui(trade)
 	local stats = frame and frame:FindFirstChild("Stats")
 	if not stats then return nil end
 
+	-- A stand is "Suit" if there's a StandSuit model under the character.
+	-- Missing character is treated as not-a-suit.
+	local function isSuit()
+		local character = LocalPlayer.Character
+		return character ~= nil and character:FindFirstChild("StandSuit") ~= nil
+	end
+
 	-- If the Stats panel is hidden, the player currently has no stand.
 	-- Return a sentinel "no stand" reading so the caller proceeds to roll
 	-- instead of looping forever waiting for a stand that isn't there.
@@ -338,6 +383,7 @@ local function readStandFromTradeGui(trade)
 			Head  = "None",
 			Move1 = "None",
 			Move2 = "None",
+			Suit  = false,
 		}
 	end
 
@@ -374,6 +420,7 @@ local function readStandFromTradeGui(trade)
 		Head  = head,
 		Move1 = move1,
 		Move2 = move2,
+		Suit  = isSuit(),
 	}
 end
 
