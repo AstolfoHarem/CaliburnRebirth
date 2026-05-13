@@ -89,13 +89,55 @@ _G.AutoRollSettings = {
 			}
 		},
 
+		["D13R"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Icicle"},
+				Move2 = {"Sword Combat"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase"},
+		    }
+		},
+
+		["DDR"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Icicle"},
+				Move2 = {"Aging Gas"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase"},
+		    }
+		},
+
+		["AKC"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Moves = {
+				Move1 = {"Icicle"},
+				Move2 = {"Ground Slam"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase"},
+		    }
+		},
+
 		["Icicle Stand"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
 			Moves = {
 				Move1 = {"Icicle"},
-				Move2 = {"Future Sight", "Ground Slam", "Time Movement", "Sword Combat", "Lightning Bolt", "Knife Throw", "Clone", "Gravity Repulse", "Tree", "Aging Gas"},
+				Move2 = {"Future Sight", "Time Movement", "Lightning Bolt", "Knife Throw", "Clone"},
 			}
 		},
 
@@ -212,7 +254,7 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Suit = false,
 			Moves = {
-				Move1 = {"Gun", "Life Punch"},
+				Move1 = {"Gun", "Life Punch", "Icicle"},
 				Move2 = {"Tree"},
 			},
 			Evo = {
@@ -227,7 +269,7 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Suit = false,
 			Moves = {
-				Move1 = {"Gun"},
+				Move1 = {"Gun", "Icicle"},
 				Move2 = {"Gravity Repulse"},
 			},
 			Evo = {
