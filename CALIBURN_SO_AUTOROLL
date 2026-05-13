@@ -9,14 +9,15 @@ _G.AutoRollSettings = {
 	RollCostItemName = "Rokakaka Fruit",
 	RollDelay = 1,
 	MovesetBlacklist = {
-		{ Move1 = {"Stand Jump"},    Move2 = {"Clone", "Grenade", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Tree", "Lightning Bolt"} },
-		{ Move1 = {"Encourage"},     Move2 = {"Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Vine Grab", "Virus Gas", "Wall Creation", "Ground Slam", "Gravity Repulse"} },
-		{ Move1 = {"Glide"},         Move2 = {"Clone", "Grenade", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Gravity Repulse", "Lightning Bolt"} },
-		{ Move1 = {"Healing Mode"},  Move2 = {"Knife Throw", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Aging Gas", "Gravity Repulse", "Lightning Bolt"} },
+		{ Move1 = {"Stand Jump"}, Move2 = {"Clone", "Grenade", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Tree", "Lightning Bolt"} },
+		{ Move1 = {"Encourage"}, Move2 = {"Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Vine Grab", "Virus Gas", "Wall Creation", "Ground Slam", "Gravity Repulse"} },
+		{ Move1 = {"Glide"}, Move2 = {"Clone", "Grenade", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Gravity Repulse", "Lightning Bolt"} },
+		{ Move1 = {"Healing Mode"}, Move2 = {"Knife Throw", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Aging Gas", "Gravity Repulse", "Lightning Bolt"} },
 		{ Move1 = {"Softening Mode"}, Move2 = {"Clone", "Grenade", "Acid Spit", "Scrape", "Time Movement", "Firebreath", "Sizzle", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Gravity Repulse", "Tree", "Lightning Bolt"} },
 		{ Move1 = {"Air Suck"}},
 		{ Move1 = {"Block"},    Move2 = {"Clone", "Grenade", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Tree", "Lightning Bolt"} },
 		{ Move1 = {"Harpoon", "Bearing Shot", "Life Punch", "Road Roller"}, Move2 = {"Acid Spit", "Fire Ankh", "Firebreath", "Virus Gas", "Bubble Bomb"} },
+		{ Move1 = {"Emerald Splash"}, Move2 = {"Grenade", "Acid Spit", "Fire Ankh", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
 	},
 	WantedStands = {
 
