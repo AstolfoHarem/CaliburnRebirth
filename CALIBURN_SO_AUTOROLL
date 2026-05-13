@@ -19,6 +19,21 @@ _G.AutoRollSettings = {
 		{ Move1 = {"Harpoon", "Bearing Shot", "Life Punch", "Road Roller"}, Move2 = {"Acid Spit", "Fire Ankh", "Firebreath", "Virus Gas", "Bubble Bomb"} },
 	},
 	WantedStands = {
+
+		["MIHOH"] = {
+			Size = nil,
+			Body = "Made in Heaven",
+			Head = nil,
+			Moves = {
+				Move1 = {"Glide"},
+				Move2 = {"Knife Throw"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Time Acceleration"},
+		    }
+		},
+
 		["Big Stand"] = {
 			Size = 1.21,
 			Body = nil,
@@ -43,7 +58,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
-			Suit = true,
+			Suit = false,
 			Moves = {
 				Move1 = {"Harpoon", "Bearing Shot"},
 				Move2 = {"Future Sight"},
@@ -131,7 +146,7 @@ _G.AutoRollSettings = {
 		    }
 		},
 
-		["PHR/Scarecrow"] = {
+		["PHOH/Scarecrow"] = {
 			Size = 1.15,
 			Body = nil,
 			Head = nil,
@@ -167,12 +182,27 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Suit = false,
 			Moves = {
-				Move1 = {"Gun", "Primary Bomb"},
+				Move1 = {"Gun"},
 				Move2 = {"Gravity Repulse"},
 			},
 			Evo = {
 		        Evolution = "Requiem",
 		        Move3 = {"Time Erase", "Time Acceleration", "Time Reversal"},
+		    }
+		},
+
+		["TEOTH"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = false,
+			Moves = {
+				Move1 = {"Primary Bomb"},
+				Move2 = {"Gravity Repulse"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Over Heaven Blast"},
 		    }
 		},
 
@@ -215,6 +245,16 @@ _G.AutoRollSettings = {
 			}
 		},
 
+		["TAT"] = {
+			Size = nil,
+			Body = nil,
+			Head = "Time After Time",
+			Moves = {
+				Move1 = nil,
+				Move2 = {"Time Movement", "Clone", "Future Sight", "Ground Slam"},
+			}
+		},
+
 		["Hunter"] = {
 			Size = nil,
 			Body = nil,
@@ -241,7 +281,7 @@ _G.AutoRollSettings = {
 			},
 			Evo = {
 		        Evolution = "OH",
-		        Move3 = {"Time Acceleration"},
+		        Move3 = {"Time Acceleration", "Sun Immunity"},
 		    }
 		},
 	}
