@@ -692,11 +692,11 @@ end
 -- EVOLUTION
 ----------------------------------------------------------------
 
--- Act stands (name contains "Act 1") can't go through the normal evolution
+-- Act stands (name contains "ACT 1") can't go through the normal evolution
 -- pipeline, so we skip Evo handling and treat them as ordinary wanted matches.
 local function isActStand(stand)
 	if not stand or not stand.Name then return false end
-	return stand.Name:find("Act 1") ~= nil
+	return stand.Name:find("ACT 1") ~= nil
 end
 
 local function getCurrentUtility()
