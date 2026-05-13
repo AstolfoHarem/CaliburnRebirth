@@ -166,6 +166,10 @@ _G.AutoRollSettings = {
 				Move1 = {"Harpoon", "Bearing Shot"},
 				Move2 = {"Future Sight"},
 			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase"},
+		    }
 		},
 
 		["KCREF"] = {
@@ -290,7 +294,7 @@ _G.AutoRollSettings = {
 			},
 			Evo = {
 		        Evolution = "Requiem",
-		        Move3 = {"Time Erase", "High Powered Stand", "Life Beam", "Time Reversal"},
+		        Move3 = {"Time Erase", "Life Beam", "Time Reversal"},
 		    }
 		},
 
@@ -369,7 +373,7 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Moves = {
 				Move1 = nil,
-				Move2 = {"Time Movement", "Clone", "Future Sight", "Ground Slam"},
+				Move2 = {"Time Movement", "Clone", "Future Sight", "Ground Slam", "Tree"},
 			}
 		},
 
