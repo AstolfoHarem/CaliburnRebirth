@@ -34,6 +34,21 @@ _G.AutoRollSettings = {
 		    }
 		},
 
+		["WAOH"] = {
+			Size = nil,
+			Body = "White Album",
+			Head = nil,
+			Suit = true,
+			Moves = {
+				Move1 = {"Skate"},
+				Move2 = {"Knife Throw", "Time Movement"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Time Acceleration"},
+		    }
+		},
+
 		["Big Stand"] = {
 			Size = 1.21,
 			Body = nil,
