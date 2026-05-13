@@ -96,7 +96,7 @@ _G.AutoRollSettings = {
 			},
 			Evo = {
 		        Evolution = "Requiem",
-		        Move3 = {"Time Reversal", "Bites The Dust", "Sheer Heart Attack"},
+		        Move3 = {"Time Reversal", "Bites the Dust", "Sheer Heart Attack"},
 		    }
 		},
 
