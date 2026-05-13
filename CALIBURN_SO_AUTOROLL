@@ -804,7 +804,7 @@ local function determineRequiredUtility(move3List)
 		if move == "Hamon Mastery" then
 			return "Hamon", "Hamon Headband", HamonRemote
 		elseif move == "Sun Immunity" then
-			return "Vampire", "Stone Mask", VampireRemote
+			return "Vampire", "Vampire Mask", VampireRemote
 		elseif move == "Infinite Rotation" then
 			return "Spin", "Steel Ball", SpinRemote
 		end
