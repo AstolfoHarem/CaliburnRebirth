@@ -121,6 +121,7 @@ _G.AutoRollSettings = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
+			Suit = false,
 			Moves = {
 				Move1 = {"Icicle"},
 				Move2 = {"Ground Slam"},
@@ -131,13 +132,28 @@ _G.AutoRollSettings = {
 		    }
 		},
 
+		["Energy Man"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = true,
+			Moves = {
+				Move1 = {"Icicle"},
+				Move2 = {"Ground Slam"},
+			},
+			Evo = {
+		        Evolution = "Over Heaven",
+		        Move3 = {"Hamon Mastery", "Time Acceleration"},
+		    }
+		},
+
 		["Icicle Stand"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
 			Moves = {
 				Move1 = {"Icicle"},
-				Move2 = {"Future Sight", "Time Movement", "Lightning Bolt", "Knife Throw", "Clone"},
+				Move2 = {"Future Sight", "Lightning Bolt", "Knife Throw", "Clone"},
 			}
 		},
 
@@ -163,6 +179,21 @@ _G.AutoRollSettings = {
 			},
 			Evo = {
 		        Evolution = "Refined",
+		        Move3 = {"Time Erase"},
+		    }
+		},
+
+		["KCR Icicle"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = false,
+			Moves = {
+				Move1 = {"Icicle"},
+				Move2 = {"Time Movement"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
 		        Move3 = {"Time Erase"},
 		    }
 		},
