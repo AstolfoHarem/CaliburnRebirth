@@ -49,6 +49,36 @@ _G.AutoRollSettings = {
 		    }
 		},
 
+		["Larry"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = true,
+			Moves = {
+				Move1 = {"Stand Jump", "Icicle", "Bearing Shot"},
+				Move2 = {"Future Sight"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Time Acceleration", "Sun Immunity"},
+		    }
+		},
+
+		["PKR"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = true,
+			Moves = {
+				Move1 = {"Harpoon"},
+				Move2 = {"Future Sight"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase"},
+		    }
+		},
+
 		["Big Stand"] = {
 			Size = 1.21,
 			Body = nil,
@@ -282,21 +312,6 @@ _G.AutoRollSettings = {
 			Evo = {
 		        Evolution = "Requiem",
 		        Move3 = {"Time Erase"},
-		    }
-		},
-
-		["Larry"] = {
-			Size = nil,
-			Body = nil,
-			Head = nil,
-			Suit = true,
-			Moves = {
-				Move1 = {"Stand Jump", "Icicle", "Bearing Shot", "Harpoon"},
-				Move2 = {"Future Sight"},
-			},
-			Evo = {
-		        Evolution = "OH",
-		        Move3 = {"Time Acceleration", "Sun Immunity"},
 		    }
 		},
 	}
