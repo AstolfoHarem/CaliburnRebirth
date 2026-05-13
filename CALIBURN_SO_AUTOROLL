@@ -4,6 +4,7 @@
 
 _G.AutoRollSettings = {
 	AutoRoll = false,
+	AutoEvolve = false,
 	StandArrow = "Stand Arrow",
 	RollCostItemName = "Rokakaka Fruit",
 	RollDelay = 1,
@@ -45,7 +46,7 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Harpoon", "Bearing Shot"},
 				Move2 = {"Future Sight"},
-			}
+			},
 		},
 
 		["KCREF"] = {
@@ -56,7 +57,11 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Blinding Bubble"},
 				Move2 = {"Future Sight"},
-			}
+			},
+			Evo = {
+		        Evolution = "Refined",
+		        Move3 = {"Time Erase"},
+		    }
 		},
 
 		["KCRHead"] = {
@@ -80,15 +85,34 @@ _G.AutoRollSettings = {
 			}
 		},
 
-		["KQ/SKR"] = {
+		["KQR"] = {
 			Size = nil,
 			Body = nil,
 			Head = nil,
 			Suit = false,
 			Moves = {
 				Move1 = {"Primary Bomb"},
-				Move2 = {"Sword Combat", "Bubble Bomb", "Grenade", "Sizzle"},
-			}
+				Move2 = {"Bubble Bomb", "Grenade"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Reversal", "Bites The Dust", "Sheer Heart Attack"},
+		    }
+		},
+
+		["SKR"] = {
+			Size = nil,
+			Body = nil,
+			Head = nil,
+			Suit = false,
+			Moves = {
+				Move1 = {"Primary Bomb"},
+				Move2 = {"Sword Combat", "Sizzle"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase", "High Powered Stand", "Universal Barrage"},
+		    }
 		},
 
 		["TWR/UWR"] = {
@@ -99,18 +123,26 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Road Roller"},
 				Move2 = {"Knife Throw", "Future Sight", "Clone", "Ground Slam", "Time Movement"},
-			}
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase", "High Powered Stand", "Time Stop", "Time Reversal", "Universal Barrage"},
+		    }
 		},
 
 		["PHR/Scarecrow"] = {
-			Size = nil,
+			Size = 1.15,
 			Body = nil,
 			Head = nil,
 			Suit = false,
 			Moves = {
 				Move1 = {"Virus Capsule"},
 				Move2 = {"Virus Gas"},
-			}
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Hamon Mastery", "Self Heal"},
+		    }
 		},
 
 		["GER"] = {
@@ -121,7 +153,11 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Gun", "Life Punch"},
 				Move2 = {"Tree"},
-			}
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase", "High Powered Stand", "Life Beam", "Time Reversal"},
+		    }
 		},
 
 		["CMR"] = {
@@ -132,7 +168,11 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Gun", "Primary Bomb"},
 				Move2 = {"Gravity Repulse"},
-			}
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase", "Time Acceleration", "Time Reversal"},
+		    }
 		},
 
 		["D4CR"] = {
@@ -142,7 +182,11 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Gun"},
 				Move2 = {"Clone"},
-			}
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase", "Love Train", "Time Reversal", "Time Acceleration"},
+		    }
 		},
 
 		["Rabbit Fighter"] = {
@@ -153,7 +197,11 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Life Punch"},
 				Move2 = {"Future Sight"},
-			}
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase", "Universal Barrage", "Time Reversal"},
+		    }
 		},
 
 		["STW"] = {
@@ -174,7 +222,11 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Gun"},
 				Move2 = {"Knife Throw"},
-			}
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase"},
+		    }
 		},
 
 		["Larry"] = {
@@ -185,7 +237,11 @@ _G.AutoRollSettings = {
 			Moves = {
 				Move1 = {"Stand Jump"},
 				Move2 = {"Future Sight"},
-			}
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Sun Immunity", "Time Acceleration"},
+		    }
 		},
 	}
 }
@@ -207,6 +263,12 @@ local PlayerGui          = LocalPlayer:WaitForChild("PlayerGui")
 local Events             = ReplicatedStorage:WaitForChild("Events")
 local ViewStandRemote    = Events:WaitForChild("ViewStand")
 local RollingItemRemote  = Events:WaitForChild("RollingItem")
+local HeavenlyDiaryRemote = Events:WaitForChild("HeavenlyDiary")
+local RefinedArrowRemote  = Events:WaitForChild("RefinedArrow")
+local RequiemArrowRemote  = Events:WaitForChild("RequiemArrow")
+local HamonRemote         = Events:WaitForChild("HamonHeadband")
+local SpinRemote          = Events:WaitForChild("SteelBall")
+local VampireRemote       = Events:WaitForChild("VampireMask")
 
 -- Forward-declared by the UI section so logic can update display elements
 -- without depending on file order.
@@ -286,7 +348,7 @@ end
 local MoveAliases = {
 	{"Sword Combat", "Arrow Combat", "Pole Combat", "Paintbrush Combat", "Bayonet Combat", "Scythe Combat", "Bow Combat", "Pen Combat", "Cutlass Combat", "Trident Combat", "Shovel Combat", "Umbrella Combat", "Cane Combat"},
 	{"Primary Bomb", "Internal Bomb", "Time Bomb"},
-	{"Gun", "Revolver", "Flintlock", "Blunderbuss", "Wand", "Shotgun", "Water Gun", "Tommy Gun"},
+	{"Gun", "Revolver", "Flintlock", "Blunderbuss", "Wand", "Shotgun", "Water Gun", "Tommy Gun", "Bananagun"},
 	{"Knife Throw", "Scale Throw", "Rose Throw", "Sharp Balloon"},
 	{"Bubble Bomb", "Tri-Bubble Bomb"},
 	{"Grenade", "Dynamite", "Skull Bomb", "Poison Potion", "Coin Toss", "Grenade Launcher"},
@@ -297,6 +359,9 @@ local MoveAliases = {
 	{"Sheer Heart Attack", "Rat Bomb", "Balloon Dog"},
 	{"Over Heaven Blast", "Ocean Blast"}, 
 	{"Reality Overwrite", "Stand Steal"},
+	{"Life Beam", "Go Beyond"},
+	{"Universal Barrage", "Universal Slice", "Universal Chop", "Universal Chomp", "Universal Icicle Barrage"},
+	{"Void Ball", "Void Slash"},
 }
 
 -- Build a name -> group lookup so checks are O(1).
@@ -422,15 +487,18 @@ local function readStandFromTradeGui(trade)
 	-- instead of looping forever waiting for a stand that isn't there.
 	if stats.Visible == false then
 		return {
+			Name  = "None",
 			Size  = 0,
 			Body  = "None",
 			Head  = "None",
 			Move1 = "None",
 			Move2 = "None",
+			Move3 = "None",
 			Suit  = false,
 		}
 	end
 
+	local nameLabel  = stats:FindFirstChild("StandName")
 	local bodyLabel  = stats:FindFirstChild("StandBody")
 	local headLabel  = stats:FindFirstChild("StandHead")
 	local scaleLabel = stats:FindFirstChild("StandScale")
@@ -441,15 +509,19 @@ local function readStandFromTradeGui(trade)
 
 	local m1Frame = movesFrame:FindFirstChild("4")
 	local m2Frame = movesFrame:FindFirstChild("5")
+	local m3Frame = movesFrame:FindFirstChild("6")
 	local m1Text  = m1Frame and m1Frame:FindFirstChild("Text2")
 	local m2Text  = m2Frame and m2Frame:FindFirstChild("Text2")
+	local m3Text  = m3Frame and m3Frame:FindFirstChild("Text2")
 	if not (m1Text and m2Text) then return nil end
 
+	local name  = (nameLabel and nameLabel.Text ~= "" and nameLabel.Text) or "None"
 	local size  = parseScale(scaleLabel.Text)
 	local body  = parseAfterColon(bodyLabel.Text)
 	local head  = parseAfterColon(headLabel.Text)
 	local move1 = m1Text.Text
 	local move2 = m2Text.Text
+	local move3 = (m3Text and m3Text.Text ~= "" and m3Text.Text) or "None"
 
 	if not size or not body or not head
 		or move1 == nil or move1 == ""
@@ -459,11 +531,13 @@ local function readStandFromTradeGui(trade)
 	end
 
 	return {
+		Name  = name,
 		Size  = size,
 		Body  = body,
 		Head  = head,
 		Move1 = move1,
 		Move2 = move2,
+		Move3 = move3,
 		Suit  = isSuit(),
 	}
 end
@@ -612,6 +686,214 @@ local function useStandArrow()
 		RollingItemRemote:InvokeServer()
 	end)
 	return ok
+end
+
+----------------------------------------------------------------
+-- EVOLUTION
+----------------------------------------------------------------
+
+-- Act stands (name contains "Act 1") can't go through the normal evolution
+-- pipeline, so we skip Evo handling and treat them as ordinary wanted matches.
+local function isActStand(stand)
+	if not stand or not stand.Name then return false end
+	return stand.Name:find("Act 1") ~= nil
+end
+
+local function getCurrentUtility()
+	local character = LocalPlayer.Character
+	if not character then return "None" end
+	local status = character:FindFirstChild("Status")
+	if not status then return "None" end
+	local util = status:FindFirstChild("Utility")
+	if not util then return "None" end
+	return util.Value or "None"
+end
+
+local function isStandOut()
+	local character = LocalPlayer.Character
+	if not character then return false end
+	local status = character:FindFirstChild("Status")
+	if not status then return false end
+	local standOut = status:FindFirstChild("StandOut")
+	if not standOut then return false end
+	return standOut.Value == true
+end
+
+-- Fires SummonStand until the StandOut flag flips true (or gives up).
+local function summonStand()
+	if isStandOut() then return true end
+
+	local gui = LocalPlayer:FindFirstChild("PlayerGui")
+	local core = gui and gui:FindFirstChild("CoreGUI")
+	local events = core and core:FindFirstChild("Events")
+	local summon = events and events:FindFirstChild("SummonStand")
+	if not summon then return false end
+
+	for _ = 1, 5 do
+		pcall(function() summon:InvokeServer() end)
+		for _ = 1, 10 do
+			task.wait(0.2)
+			if isStandOut() then return true end
+		end
+	end
+	return isStandOut()
+end
+
+-- Same equip procedure as useStandArrow, generalised to any item + remote.
+-- Returns true if the remote was invoked, false on a glitch/error.
+local function equipAndFireItem(itemName, remote)
+	local character = LocalPlayer.Character
+	if not character or not character.Parent or not character:FindFirstChild("HumanoidRootPart") then
+		character = LocalPlayer.CharacterAdded:Wait()
+		character:WaitForChild("HumanoidRootPart")
+	end
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return false end
+
+	-- Trade UI has to be closed before any tool can be equipped, same as
+	-- rolling. Skip if it's already gone.
+	local trade = PlayerGui:FindFirstChild("Trade")
+	if trade then
+		local events = trade:FindFirstChild("Events")
+		local closeRemote = events and events:FindFirstChild("Close")
+		if closeRemote then
+			pcall(function() closeRemote:FireServer() end)
+			task.wait(1)
+		end
+	end
+
+	pcall(function() humanoid:UnequipTools() end)
+
+	local function findItem(name)
+		local backpack = LocalPlayer:FindFirstChild("Backpack")
+		if backpack then
+			local i = backpack:FindFirstChild(name)
+			if i then return i end
+		end
+		if character then
+			local i = character:FindFirstChild(name)
+			if i then return i end
+		end
+		return nil
+	end
+
+	local item = findItem(itemName)
+	if not item then
+		-- Same glitch recovery as the stand arrow path: buy + respawn.
+		if getInventoryCount(itemName) > 0 then
+			buyItem(itemName)
+			pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Dead) end)
+		end
+		return false
+	end
+
+	local ok = pcall(function()
+		humanoid:EquipTool(item)
+		task.wait(1)
+		remote:InvokeServer()
+	end)
+	return ok
+end
+
+-- Inspects a Move3 criteria list and returns the utility required to obtain
+-- any of those moves, or nil if none of them need a utility.
+local function determineRequiredUtility(move3List)
+	if not move3List then return nil end
+	for _, move in ipairs(move3List) do
+		if move == "Hamon Mastery" then
+			return "Hamon", "Hamon Headband", HamonRemote
+		elseif move == "Sun Immunity" then
+			return "Vampire", "Stone Mask", VampireRemote
+		elseif move == "Infinite Rotation" then
+			return "Spin", "Steel Ball", SpinRemote
+		end
+	end
+	return nil
+end
+
+local function evolutionItemAndRemote(evolutionName)
+	if evolutionName == "OH" then
+		return "Heavenly Diary", HeavenlyDiaryRemote
+	elseif evolutionName == "Requiem" then
+		return "Requiem Arrow", RequiemArrowRemote
+	elseif evolutionName == "Refined" then
+		return "Refined Arrow", RefinedArrowRemote
+	end
+	return nil, nil
+end
+
+-- Evolves the current stand and checks the resulting Move3 against evoSpec.Move3.
+-- Returns one of:
+--   "match"    — Move3 matches; caller should stop AutoRoll.
+--   "no_match" — Evolution finished but Move3 doesn't match; caller should reroll.
+--   "stop"     — Fatal failure (out of money etc.); notifyWarn already called.
+--   "retry"    — Transient failure (glitch); caller should wait briefly and try again.
+local function performEvolution(matchName, evoSpec)
+	local evoItem, evoRemote = evolutionItemAndRemote(evoSpec.Evolution)
+	if not evoItem then
+		notifyWarn(("[AutoRoll] Unknown Evolution \"%s\" for %s. Stopping."):format(tostring(evoSpec.Evolution), matchName))
+		return "stop"
+	end
+
+	-- If Move3 includes a utility-locked move, obtain that utility first.
+	local utilName, utilItem, utilRemote = determineRequiredUtility(evoSpec.Move3)
+	if utilName and getCurrentUtility() == "None" then
+		if not ensureItemInStock(utilItem) then
+			notifyWarn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(utilItem))
+			return "stop"
+		end
+		if not equipAndFireItem(utilItem, utilRemote) then
+			return "retry"
+		end
+		-- Wait for Utility to flip away from "None".
+		local got = false
+		for _ = 1, 20 do
+			task.wait(0.25)
+			if getCurrentUtility() ~= "None" then got = true; break end
+		end
+		if not got then return "retry" end
+	end
+
+	-- Stand must be summoned before evolving.
+	if not summonStand() then return "retry" end
+
+	if not ensureItemInStock(evoItem) then
+		notifyWarn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(evoItem))
+		return "stop"
+	end
+	if not equipAndFireItem(evoItem, evoRemote) then
+		return "retry"
+	end
+	notify(("[AutoRoll] Evolving \"%s\" to %s..."):format(matchName, evoSpec.Evolution))
+
+	-- Wait for Move3 to populate. If it stays "None", refire the evolution.
+	for attempt = 1, 5 do
+		task.wait(2)
+		local newStand = getCurrentStand()
+		if newStand and newStand.Move3 and newStand.Move3 ~= "None" then
+			if evoSpec.Move3 == nil or moveListContains(evoSpec.Move3, newStand.Move3) then
+				notify(("[AutoRoll] Evolution success for \"%s\" — Move 3 \"%s\" matches. Stopping."):format(matchName, newStand.Move3))
+				return "match"
+			else
+				notify(("[AutoRoll] Evolution failed for \"%s\" — Move 3 \"%s\" doesn't match, rerolling."):format(matchName, newStand.Move3))
+				return "no_match"
+			end
+		end
+
+		if attempt < 5 then
+			if not ensureItemInStock(evoItem) then
+				notifyWarn(("[AutoRoll] Couldn't acquire %s — out of money? Stopping."):format(evoItem))
+				return "stop"
+			end
+			summonStand()
+			if not equipAndFireItem(evoItem, evoRemote) then
+				return "retry"
+			end
+		end
+	end
+
+	return "retry"
 end
 
 ----------------------------------------------------------------
@@ -1024,6 +1306,10 @@ autoRollSetter = makeToggleRow("Auto Roll", _G.AutoRollSettings.AutoRoll, functi
 	_G.AutoRollSettings.AutoRoll = v
 end)
 
+makeToggleRow("Auto Evolve", _G.AutoRollSettings.AutoEvolve, function(v)
+	_G.AutoRollSettings.AutoEvolve = v
+end)
+
 makeSliderRow("Roll Delay", 1, 10, _G.AutoRollSettings.RollDelay, function(v)
 	_G.AutoRollSettings.RollDelay = v
 end)
@@ -1039,6 +1325,7 @@ local bodyLbl  = makeInfoRow("Body: -")
 local headLbl  = makeInfoRow("Head: -")
 local move1Lbl = makeInfoRow("Move 1: -")
 local move2Lbl = makeInfoRow("Move 2: -")
+local move3Lbl = makeInfoRow("Move 3: -")
 local sizeLbl  = makeInfoRow("Scale: -")
 
 updateLastStandDisplay = function(stand)
@@ -1047,6 +1334,7 @@ updateLastStandDisplay = function(stand)
 	headLbl.Text  = "Head: "   .. tostring(stand.Head  or "-")
 	move1Lbl.Text = "Move 1: " .. tostring(stand.Move1 or "-")
 	move2Lbl.Text = "Move 2: " .. tostring(stand.Move2 or "-")
+	move3Lbl.Text = "Move 3: " .. tostring(stand.Move3 or "-")
 	sizeLbl.Text  = "Scale: "  .. tostring(stand.Size  or "-")
 end
 
@@ -1092,16 +1380,42 @@ _loopThread = task.spawn(function()
 		-- 1. Read the current stand (waits until Trade GUI gives valid data).
 		local stand = getCurrentStand()
 
-		-- 2. Already on a wanted stand? Stop. (Unless its moveset is blacklisted.)
+		-- 2. Already on a wanted stand? Stop or evolve. (Unless moveset is blacklisted.)
 		local matched, matchName = isWantedStand(stand)
 		if matched and isMovesetBlacklisted(stand) then
 			matched = false
 		end
 		if matched then
-			settings.AutoRoll = false
-			if autoRollSetter then autoRollSetter(false) end
-			notify(("[AutoRoll] Wanted stand found (\"%s\"). Stopping."):format(matchName))
-			continue
+			local matchCriteria = settings.WantedStands[matchName]
+			local evo = matchCriteria and matchCriteria.Evo
+			if settings.AutoEvolve and evo then
+				if isActStand(stand) then
+					-- Act stands can't be evolved — stop as if it were a normal match.
+					settings.AutoRoll = false
+					if autoRollSetter then autoRollSetter(false) end
+					notify(("[AutoRoll] Wanted stand found (\"%s\") but it's an Act stand and can't be evolved. Stopping."):format(matchName))
+					continue
+				end
+				local result = performEvolution(matchName, evo)
+				if result == "match" then
+					settings.AutoRoll = false
+					if autoRollSetter then autoRollSetter(false) end
+					continue
+				elseif result == "stop" then
+					settings.AutoRoll = false
+					if autoRollSetter then autoRollSetter(false) end
+					continue
+				elseif result == "retry" then
+					task.wait(1)
+					continue
+				end
+				-- "no_match": fall through to roll again.
+			else
+				settings.AutoRoll = false
+				if autoRollSetter then autoRollSetter(false) end
+				notify(("[AutoRoll] Wanted stand found (\"%s\"). Stopping."):format(matchName))
+				continue
+			end
 		end
 
 		-- 3. Make sure we have a Rokakaka and a Stand Arrow (buys if not).
