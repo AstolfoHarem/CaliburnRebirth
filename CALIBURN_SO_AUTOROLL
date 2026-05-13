@@ -292,8 +292,8 @@ _G.AutoRollSettings = {
 
 		["TAT"] = {
 			Size = nil,
-			Body = nil,
-			Head = "Time After Time",
+			Body = "Time After Time",
+			Head = nil,
 			Moves = {
 				Move1 = nil,
 				Move2 = {"Time Movement", "Clone", "Future Sight", "Ground Slam"},
