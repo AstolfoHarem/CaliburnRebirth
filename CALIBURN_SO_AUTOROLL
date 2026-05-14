@@ -65,6 +65,22 @@ _G.AutoRollSettings = {
 		    }
 		},
 
+	-- Normal
+		["SP6OH"] = {
+			Size = 1.2,
+			Body = "Star Platinum (Part 6)",
+			Head = "Star Platinum (Part 6)",
+			Suit = false,
+			Moves = {
+				Move1 = {"Harpoon"},
+				Move2 = {"Time Movement", "Ground Slam", "Tree"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Time Stop", "Hamon Mastery"},
+		    }
+		},
+
 		["MIHOH"] = {
 			Size = nil,
 			Body = "Made in Heaven",
@@ -78,6 +94,8 @@ _G.AutoRollSettings = {
 		        Move3 = {"Time Acceleration"},
 		    }
 		},
+
+	-- Suits
 
 		["WAOH"] = {
 			Size = nil,
