@@ -17,9 +17,53 @@ _G.AutoRollSettings = {
 		{ Move1 = {"Air Suck"}},
 		{ Move1 = {"Block"},    Move2 = {"Clone", "Grenade", "Acid Spit", "Bubble Bomb", "Fire Ankh", "Scrape", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Ground Slam", "Tree", "Lightning Bolt"} },
 		{ Move1 = {"Harpoon", "Bearing Shot", "Life Punch", "Road Roller", "Star Finger"}, Move2 = {"Acid Spit", "Fire Ankh", "Firebreath", "Virus Gas", "Bubble Bomb"} },
-		{ Move1 = {"Emerald Splash"}, Move2 = {"Grenade", "Acid Spit", "Fire Ankh", "Firebreath", "Sizzle", "Sword Combat", "Vine Grab", "Virus Gas", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
+		{ Move1 = {"Emerald Splash"}, Move2 = {"Scrape", "Grenade", "Acid Spit", "Fire Ankh", "Firebreath", "Sizzle", "Sword Combat", "Virus Gas", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
+		{ Move1 = {"Blinding Bubble"}, Move2 = {"Tree", "Time Movement", "Gravity Repulse", "Lightning Bolt", "Scrape", "Vine Grab", "Grenade", "Acid Spit", "Fire Ankh", "Firebreath", "Sizzle", "Virus Gas", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
 	},
 	WantedStands = {
+	-- Event Stands
+		["Jiangshi"] = {
+			Size = 1.21,
+			Body = nil,
+			Head = nil,
+			Suit = false,
+			Moves = {
+				Move1 = {"Icicle"},
+				Move2 = {"Knife Throw"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Sun Immunity"},
+		    }
+		},
+
+		["Red Queen"] = {
+			Size = nil,
+			Body = "Red Queen",
+			Head = "Red Queen",
+			Moves = {
+				Move1 = {"Fireball"},
+				Move2 = {"Firebreath"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Over Heaven Blast", "Self Heal"},
+		    }
+		},
+
+		["Alice"] = {
+			Size = nil,
+			Body = "Alice",
+			Head = "Alice",
+			Moves = {
+				Move1 = {"Blinding Bubble", "Icicle"},
+				Move2 = {"Bubble Bomb", "Clone", "Tree", "Gravity Repulse"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Over Heaven Blast", "Self Heal"},
+		    }
+		},
 
 		["MIHOH"] = {
 			Size = nil,
@@ -154,7 +198,7 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Moves = {
 				Move1 = {"Icicle"},
-				Move2 = {"Future Sight", "Lightning Bolt", "Knife Throw", "Clone"},
+				Move2 = {"Future Sight", "Clone"},
 			}
 		},
 
@@ -219,7 +263,7 @@ _G.AutoRollSettings = {
 			Body = nil,
 			Head = nil,
 			Moves = {
-				Move1 = {"Primary Bomb", "Fireball"},
+				Move1 = {"Primary Bomb", "Fireball", "Icicle"},
 				Move2 = {"Lightning Bolt"},
 			}
 		},
