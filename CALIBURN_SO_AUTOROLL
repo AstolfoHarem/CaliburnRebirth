@@ -1080,7 +1080,7 @@ local function performEvolution(matchName, evoSpec)
 
 	-- Wait for Move3 to populate. If it stays "None", refire the evolution.
 	for attempt = 1, 5 do
-		task.wait(2)
+		task.wait(4)
 		local newStand = getCurrentStand()
 		if newStand and newStand.Move3 and newStand.Move3 ~= "None" then
 			if evoSpec.Move3 == nil or moveListContains(evoSpec.Move3, newStand.Move3) then
