@@ -19,6 +19,7 @@ _G.AutoRollSettings = {
 		{ Move1 = {"Harpoon", "Bearing Shot", "Life Punch", "Road Roller", "Star Finger"}, Move2 = {"Acid Spit", "Fire Ankh", "Firebreath", "Virus Gas", "Bubble Bomb"} },
 		{ Move1 = {"Emerald Splash"}, Move2 = {"Scrape", "Grenade", "Acid Spit", "Fire Ankh", "Firebreath", "Sizzle", "Sword Combat", "Virus Gas", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
 		{ Move1 = {"Blinding Bubble"}, Move2 = {"Tree", "Time Movement", "Gravity Repulse", "Lightning Bolt", "Scrape", "Vine Grab", "Grenade", "Acid Spit", "Fire Ankh", "Firebreath", "Sizzle", "Virus Gas", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
+		{ Move1 = {"Fireball"}, Move2 = {"Time Movement", "Scrape", "Vine Grab", "Grenade", "Acid Spit", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
 	},
 	WantedStands = {
 	-- Event Stands
