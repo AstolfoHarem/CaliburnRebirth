@@ -377,12 +377,12 @@ _G.AutoRollSettings = {
 		},
 
 		["TEOTH"] = {
-			Size = nil,
+			Size = 1.1,
 			Body = nil,
 			Head = nil,
 			Suit = false,
 			Moves = {
-				Move1 = {"Primary Bomb"},
+				Move1 = {"Primary Bomb", "Fireball"},
 				Move2 = {"Gravity Repulse"},
 			},
 			Evo = {
