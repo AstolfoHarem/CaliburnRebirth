@@ -67,19 +67,14 @@ _G.AutoRollSettings = {
 		},
 
 	-- Normal
-		["SP6OH"] = {
+		["CD"] = {
 			Size = 1.2,
-			Body = "Star Platinum (Part 6)",
-			Head = "Star Platinum (Part 6)",
+			Body = "Crazy Diamond",
 			Suit = false,
 			Moves = {
-				Move1 = {"Harpoon"},
-				Move2 = {"Time Movement", "Ground Slam", "Tree"},
+				Move1 = {"Bearing Shot"},
+				Move2 = {"Ground Slam", "Tree", "Wall", "Knife Throw"},
 			},
-			Evo = {
-		        Evolution = "OH",
-		        Move3 = {"Time Stop", "Hamon Mastery"},
-		    }
 		},
 
 		["MIHOH"] = {
