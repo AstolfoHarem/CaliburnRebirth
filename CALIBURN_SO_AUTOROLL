@@ -567,7 +567,7 @@ local MoveAliases = {
 	{"Over Heaven Blast", "Ocean Blast"}, 
 	{"Reality Overwrite", "Stand Steal"},
 	{"Life Beam", "Go Beyond"},
-	{"Universal Barrage", "Universal Slice", "Universal Chop", "Universal Chomp", "Universal Icicle Barrage"},
+	{"Universal Barrage", "Universal Slice", "Universal Chop", "Universal Chomp", "Universal Icicle Barrage", "Universal Double Slice"},
 	{"Void Ball", "Void Slash"},
 }
 
