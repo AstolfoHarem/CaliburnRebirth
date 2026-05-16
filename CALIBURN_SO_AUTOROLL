@@ -22,6 +22,27 @@ _G.AutoRollSettings = {
 		{ Move1 = {"Fireball"}, Move2 = {"Time Movement", "Scrape", "Vine Grab", "Grenade", "Acid Spit", "Wall Creation", "Aging Gas", "Knife Throw", "Ground Slam"} },
 	},
 	WantedStands = {
+	-- Rare Stuff
+		["STW"] = {
+			Size = nil,
+			Body = "Shadow The World",
+			Head = "Shadow The World",
+			Moves = {
+				Move1 = nil,
+				Move2 = nil,
+			}
+		},
+
+		["TAT"] = {
+			Size = nil,
+			Body = "Time After Time",
+			Head = nil,
+			Moves = {
+				Move1 = nil,
+				Move2 = {"Time Movement", "Clone", "Future Sight", "Ground Slam", "Tree"},
+			}
+		},
+
 	-- Event Stands
 		["Jiangshi"] = {
 			Size = 1.21,
@@ -414,26 +435,6 @@ _G.AutoRollSettings = {
 		        Evolution = "Requiem",
 		        Move3 = {"Time Erase", "Universal Barrage", "Time Reversal"},
 		    }
-		},
-
-		["STW"] = {
-			Size = nil,
-			Body = "Shadow The World",
-			Head = "Shadow The World",
-			Moves = {
-				Move1 = nil,
-				Move2 = nil,
-			}
-		},
-
-		["TAT"] = {
-			Size = nil,
-			Body = "Time After Time",
-			Head = nil,
-			Moves = {
-				Move1 = nil,
-				Move2 = {"Time Movement", "Clone", "Future Sight", "Ground Slam", "Tree"},
-			}
 		},
 
 		["Hunter"] = {
