@@ -135,12 +135,12 @@ _G.AutoRollSettings = {
 			Head = nil,
 			Suit = true,
 			Moves = {
-				Move1 = {"Stand Jump", "Icicle", "Bearing Shot"},
+				Move1 = {"Stand Jump", "Icicle"},
 				Move2 = {"Future Sight"},
 			},
 			Evo = {
 		        Evolution = "OH",
-		        Move3 = {"Time Acceleration", "Sun Immunity"},
+		        Move3 = {"Time Acceleration"},
 		    }
 		},
 
