@@ -160,7 +160,7 @@ _G.AutoRollSettings = {
 		},
 
 		["Big Stand"] = {
-			Size = 1.21,
+			Size = 1.25,
 			Body = nil,
 			Head = nil,
 			Moves = {
