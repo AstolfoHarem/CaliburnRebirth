@@ -87,6 +87,35 @@ _G.AutoRollSettings = {
 		    }
 		},
 
+		["ED4C"] = {
+			Size = 1.1,
+			Body = "Easter D4C",
+			Head = nil,
+			Moves = {
+				Move1 = {"Bearing Shot"},
+				Move2 = {"Ground Slam"},
+			},
+			Evo = {
+		        Evolution = "Requiem",
+		        Move3 = {"Time Erase", "Love Train"},
+		    }
+		},
+
+		["PHOH/Scarecrow"] = {
+			Size = 1.2,
+			Body = nil,
+			Head = nil,
+			Suit = false,
+			Moves = {
+				Move1 = {"Virus Capsule"},
+				Move2 = {"Virus Gas"},
+			},
+			Evo = {
+		        Evolution = "OH",
+		        Move3 = {"Hamon Mastery", "Self Heal"},
+		    }
+		},
+
 	-- Normal
 		["CD"] = {
 			Size = 1.2,
@@ -238,7 +267,7 @@ _G.AutoRollSettings = {
 		},
 
 		["KCR/Atum"] = {
-			Size = nil,
+			Size = 1,
 			Body = nil,
 			Head = nil,
 			Suit = false,
@@ -348,23 +377,8 @@ _G.AutoRollSettings = {
 		    }
 		},
 
-		["PHOH/Scarecrow"] = {
-			Size = 1.15,
-			Body = nil,
-			Head = nil,
-			Suit = false,
-			Moves = {
-				Move1 = {"Virus Capsule"},
-				Move2 = {"Virus Gas"},
-			},
-			Evo = {
-		        Evolution = "OH",
-		        Move3 = {"Hamon Mastery", "Self Heal"},
-		    }
-		},
-
 		["GER"] = {
-			Size = nil,
+			Size = 1.1,
 			Body = nil,
 			Head = nil,
 			Suit = false,
@@ -394,7 +408,7 @@ _G.AutoRollSettings = {
 		},
 
 		["TEOTH"] = {
-			Size = 1.1,
+			Size = 1.2,
 			Body = nil,
 			Head = nil,
 			Suit = false,
@@ -419,21 +433,6 @@ _G.AutoRollSettings = {
 			Evo = {
 		        Evolution = "Requiem",
 		        Move3 = {"Time Erase", "Love Train", "Time Reversal", "Time Acceleration"},
-		    }
-		},
-
-		["Rabbit Fighter"] = {
-			Size = nil,
-			Body = nil,
-			Head = nil,
-			Suit = false,
-			Moves = {
-				Move1 = {"Life Punch"},
-				Move2 = {"Future Sight"},
-			},
-			Evo = {
-		        Evolution = "Requiem",
-		        Move3 = {"Time Erase", "Universal Barrage", "Time Reversal"},
 		    }
 		},
 
