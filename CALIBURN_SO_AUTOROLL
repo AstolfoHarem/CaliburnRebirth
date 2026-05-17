@@ -443,7 +443,7 @@ _G.AutoRollSettings = {
 			Suit = true,
 			Moves = {
 				Move1 = {"Gun"},
-				Move2 = {"Knife Throw"},
+				Move2 = {"Knife Throw", "Future Sight"},
 			},
 			Evo = {
 		        Evolution = "Requiem",
